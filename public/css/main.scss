@@ -157,3 +157,13 @@ textarea {
     background-color: #f1ef00;
   }
 }
+
+// Basic Bottlepay Button CSS
+.btn-bottlepay {
+  background-color: #642872;
+  color: #000 !important;
+
+  &:hover, &:active {
+    background-color: #642899;
+  }
+}

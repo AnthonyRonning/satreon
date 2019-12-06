@@ -213,6 +213,10 @@ app.get('/auth/linkedin', passport.authenticate('linkedin', { state: 'SOME STATE
 app.get('/auth/linkedin/callback', passport.authenticate('linkedin', { failureRedirect: '/login' }), (req, res) => {
   res.redirect(req.session.returnTo || '/');
 });
+app.get('/auth/bottlepay', passport.authenticate('bottlepay', { scope: 'user:public wallet:invoice' }));
+app.get('/auth/bottlepay/callback', passport.authenticate('bottlepay', { failureRedirect: '/login' }), (req, res) => {
+  res.redirect(req.session.returnTo || '/');
+});
 
 /**
  * OAuth authorization routes. (API examples)

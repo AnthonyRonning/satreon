@@ -596,6 +596,103 @@ passport.use('pinterest', new OAuth2Strategy({
   });
 }));
 
+
+/**
+ * BottlePay API OAuth.
+ */
+passport.use('bottlepay', new OAuth2Strategy({
+  authorizationURL: 'https://bottle.dev/oauth/authorize',
+  tokenURL: 'https://bottle.dev/oauth/token',
+  clientID: process.env.BOTTLEPAY_ID,
+  clientSecret: process.env.BOTTLEPAY_SECRET,
+  callbackURL: process.env.BOTTLEPAY_REDIRECT_URL,
+  passReqToCallback: true
+},
+(req, accessToken, refreshToken, profile, done) => {
+  if (req.user) {
+    User.findById(req.user._id, (err, user) => {
+      if (err) {
+        return done(err);
+      }
+      user.bottlepay = req.id;
+      if (user.tokens.filter((vendor) => (vendor.kind === 'bottlepay'))[0]) {
+        user.tokens.some((tokenObject) => {
+          if (tokenObject.kind === 'bottlepay') {
+            tokenObject.accessToken = accessToken;
+            tokenObject.refreshToken = refreshToken;
+            return true;
+          }
+          return false;
+        });
+        user.markModified('tokens');
+        user.save((err) => {
+          done(err, user);
+        });
+      } else {
+        user.tokens.push({
+          kind: 'bottlepay',
+          accessToken,
+          refreshToken,
+        });
+        user.save((err) => {
+          done(err, user);
+        });
+      }
+    });
+  } else {
+    // need to get profile
+    const config = {
+      headers: { Authorization: `Bearer ${accessToken}` }
+    };
+
+    axios.get('https://bottle.dev/api/user', config)
+      .then(({ data }) => {
+        const userProfile = data;
+
+        console.log('looking for exisitng bottlepay user...')
+        User.findOne({ bottlepay: userProfile.id }, (err, existingUser) => {
+          if (err) {
+            console.log('error finding one bottlepay user with id: ' + userProfile.id);
+            return done(err);
+          }
+          if (existingUser) {
+            console.log('found existing bottlepay user: ' + existingUser);
+
+            User.findById(existingUser._id, (err, user) => {
+              if (err) {
+                return done(err);
+              }
+              user.tokens.push({
+                kind: 'bottlepay',
+                accessToken
+              });
+              user.save((err) => {
+                done(err, user);
+              });
+            });
+          } else {
+            console.log('could not find exisitng bottlepay user...');
+
+            const user = new User();
+            user.bottlepay = userProfile.id;
+            user.email = userProfile.email ? userProfile.email : `${userProfile.id}@bottlepay.com`; // bottlepay does not disclose emails, prevent duplicate keys
+            user.tokens.push({
+              kind: 'bottlepay',
+              accessToken
+            });
+            user.profile.name = userProfile.name;
+            user.profile.picture = userProfile.avatar;
+            user.save((err) => {
+              done(err, user);
+            });
+          }
+        });
+      }).catch((err) => {
+        done(err, null);
+      });
+  }
+}));
+
 /**
  * Intuit/QuickBooks API OAuth.
  */

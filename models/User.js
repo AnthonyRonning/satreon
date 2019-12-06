@@ -19,6 +19,7 @@ const userSchema = new mongoose.Schema({
   linkedin: String,
   steam: String,
   quickbooks: String,
+  bottlepay: String,
   tokens: Array,
 
   profile: {
