@@ -368,6 +368,15 @@ The same goes for other providers.
 - Create a new app by going to your Dashboard using the My Apps option in the top nav bar or by going to <a href="https://developer.intuit.com/app/developer/myapps" target="_blank">https://developer.intuit.com/app/developer/myapps</a>
 - In your App, under Development, Keys & OAuth (right nav), find the Client ID and Client Secret for your `.env` file
 
+<hr>
+
+BottlePay
+
+- Go to <a href="https://bottle.dev/home/profile/clients" target="_blank">https://bottle.dev/home/profile/clients</a>
+- Add new OAuth App
+- Add Photo, Name, Homepage URL, Developer Name, Description, and Callback (example: https://yourhost.com/auth/bottlepay/callback).
+- Copy the Client ID, Client Secret, and Callback and paste into the bottlepay environment variables for your `.env` file.
+
 Project Structure
 -----------------
 
