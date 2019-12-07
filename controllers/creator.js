@@ -42,6 +42,8 @@ exports.viewCreator = async (req, res) => {
  * View a creator's post.
  */
 exports.viewPost = async (req, res) => {
+
+  // get the creator
   const getCreator = new Promise((res, rej) => {
     console.log(req);
     User.findById(req.params.userId, (err, user) => {
@@ -54,6 +56,7 @@ exports.viewPost = async (req, res) => {
 
   const creator = await getCreator;
 
+  // get the post
   const getContentById = new Promise((res, rej) => {
     Content.findById(req.params.postId, (err, content) => {
       if (err) console.error(err);
@@ -65,9 +68,13 @@ exports.viewPost = async (req, res) => {
 
   const content = await getContentById;
 
+  // check to see if the user is authorized to see
+  const authorized = true;
+
   res.render('creator/post/post', {
     title: 'View Post',
     creator,
-    content
+    content,
+    authorized
   });
 };
