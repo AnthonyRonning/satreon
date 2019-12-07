@@ -4,11 +4,8 @@ const contentSchema = new mongoose.Schema({
   title: String,
   content: String,
   price: Number,
-
-  user: {
-    name: String,
-    id: String
-  }
+  userName: String,
+  userId: String
 }, { timestamps: true });
 
 const Content = mongoose.model('Content', contentSchema);

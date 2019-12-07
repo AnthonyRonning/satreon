@@ -23,8 +23,8 @@ exports.postContent = (req, res, next) => {
     newContent.title = req.body.title || '';
     newContent.content = req.body.content || '';
     newContent.price = req.body.price || 0;
-    newContent.user.id = req.user.id || '';
-    newContent.user.name = user.profile.name || '';
+    newContent.userId = req.user.id || '';
+    newContent.userName = user.profile.name || '';
 
     newContent.save((err) => {
       if (err) {

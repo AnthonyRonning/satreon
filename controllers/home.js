@@ -7,7 +7,7 @@ const User = require('../models/User');
 exports.index = async (req, res) => {
   const getAllUsers = new Promise((res, rej) => {
     User.find((err, users) => {
-      console.log('got all users: ' + users);
+      // console.log('got all users: ' + users);
       res(users);
     });
   });
