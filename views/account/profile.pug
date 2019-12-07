@@ -45,6 +45,14 @@ block content
       .col-md-7
         input.form-control(type='text', name='website', id='website', value=user.profile.website, autocomplete='url')
     .form-group.row
+      label.col-md-3.col-form-label.font-weight-bold.text-right(for='description') description
+      .col-md-7
+        input.form-control(type='text', name='description', id='description', value=user.profile.description)
+    .form-group.row
+      label.col-md-3.col-form-label.font-weight-bold.text-right(for='supporterAmount') supporter amount per month
+      .col-md-7
+        input.form-control(type='text', name='supporterAmount', id='supporterAmount', value=user.profile.supporterAmount)
+    .form-group.row
       label.col-md-3.col-form-label.font-weight-bold.text-right Gravatar
       .col-sm-4
         img(src=user.gravatar(), class='profile', width='100', height='100')
