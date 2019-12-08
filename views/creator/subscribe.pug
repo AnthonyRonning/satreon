@@ -1,0 +1,11 @@
+extends ../layout
+
+block content
+    h1= `Subscribe to ${creator.profile.name}'s Profile`
+    p.lead
+        | Subscribe for&nbsp;
+        =  creator.profile.supporterAmount
+        |  SATS per month
+    hr
+    h2.text-center Pay the invoice to subscribe for a month!
+    p.text-center.word-wrap= invoice.payment_request

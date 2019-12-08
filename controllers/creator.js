@@ -85,3 +85,35 @@ exports.viewPost = async (req, res) => {
     invoice
   });
 };
+
+
+/**
+ * GET /creator/:userId/subscribe
+ * View the subscription page of a creator
+ */
+exports.subscribe = async (req, res) => {
+
+  // get the creator
+  const getCreator = new Promise((res, rej) => {
+    console.log(req);
+    User.findById(req.params.userId, (err, user) => {
+      if (err) console.error(err);
+
+      console.log(`got creator: ${user}`);
+      res(user);
+    });
+  });
+
+  const creator = await getCreator;
+
+  // create an invoice for the user to pay
+  const invoice = await lnrpc.addInvoice(creator.profile.supporterAmount);
+  console.log('invoice: ' + JSON.stringify(invoice));
+  console.log(invoice);
+
+  res.render('creator/subscribe', {
+    title: 'Subscribe to Creator',
+    creator,
+    invoice
+  });
+};

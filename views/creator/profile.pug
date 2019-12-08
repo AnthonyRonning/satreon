@@ -2,11 +2,21 @@ extends ../layout
 
 block content
     h1= `${creator.profile.name}'s Profile`
-    p.lead View all of their posts!
+    p.lead
+        | Become a premium subscriber!
+        br
+        a.btn.btn-raised(href=`/creator/${creator._id}/subscribe`, role='button')
+            | Subscribe&nbsp;
+            =  creator.profile.supporterAmount
+            |  SATS per month
     hr
     .row
         each content in contents
             .col-md-6
                 h2= content.title
+                p
+                    | Price:
+                    = content.price
+                    |  SATS
                 p
                     a.btn.btn-raised(href=`/creator/${creator._id}/post/${content._id}`, role='button') View details »
