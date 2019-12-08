@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const Content = require('../models/Content');
 const lnrpc = require('../services/lnd/lnd');
+const lsat = require('../services/lsat/lsat');
 
 /**
  * GET /creator/:userId
@@ -70,7 +71,9 @@ exports.viewPost = async (req, res) => {
   const content = await getContentById;
 
   // check to see if the user is authorized to see
-  const authorized = false;
+  const preimage = 'bdd6e2403f9f9140bdca9f0a47e3458a24d5106cb20a74879631a9d025cf38c6';
+  const macaroon = 'AgEZaHR0cHM6Ly9lZGQwZWNjMS5uZ3Jvay5pbwIYNWRlYWNiZjZjZTNlMTU4NDc0ZTNjZDQ5AAIlc3Vic2NyaWJlciA9IDVkZWFjYmY2Y2UzZTE1ODQ3NGUzY2Q0OQACImV4cGlyZXMgPSAyMDIwLTAxLTA4VDE3OjM1OjE1LjE1MFoAAk9wcmVpbWFnZUhhc2ggPSAxOWIzMzRhOWJkMzRjNzRjNjg5NTEwYWIwNzI5OTgwYmIwMGUxMTk2ZjM4YzE4N2Q3NWMyMWZiN2ZjNmEwNmYyAAAGIAj7DJg3AsbZia5s7sbeSi2EgFRKKoUhNewocnjGozxA';
+  const authorized = await lsat.verifyMacaroon(macaroon, preimage, creator._id);
 
   // create an invoice for the user to pay
   const invoice = await lnrpc.addInvoice(content.price);
@@ -111,9 +114,13 @@ exports.subscribe = async (req, res) => {
   console.log('invoice: ' + JSON.stringify(invoice));
   console.log(invoice);
 
+  // create a macaroon to give to the user
+  const macaroon = await lsat.generateMacaroon(creator._id.toString(), invoice);
+
   res.render('creator/subscribe', {
     title: 'Subscribe to Creator',
     creator,
-    invoice
+    invoice,
+    macaroon
   });
 };
