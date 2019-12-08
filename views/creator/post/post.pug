@@ -8,4 +8,5 @@ block content
         h3= content.content
     else
         h4.text-center You have not paid or subscribed to this user to view this post! 😡
-        h4.text-center Scan the QR code to pay for this post or click here to subscribe to this creator.
+        h4.text-center Pay the invoice below or click here to subscribe to this creator.
+        p.text-center.word-wrap= invoice.payment_request

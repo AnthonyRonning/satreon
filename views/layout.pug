@@ -10,6 +10,10 @@ html
     link(rel='shortcut icon', href='/favicon.png')
     link(rel='stylesheet', href='/css/main.css')
     block head
+    style(type='text/css').
+      .word-wrap {
+        word-wrap: break-word
+      }
 
   body
     include partials/header

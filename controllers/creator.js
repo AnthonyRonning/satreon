@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const Content = require('../models/Content');
+const lnrpc = require('../services/lnd/lnd');
 
 /**
  * GET /creator/:userId
@@ -69,12 +70,18 @@ exports.viewPost = async (req, res) => {
   const content = await getContentById;
 
   // check to see if the user is authorized to see
-  const authorized = true;
+  const authorized = false;
+
+  // create an invoice for the user to pay
+  const invoice = await lnrpc.addInvoice(content.price);
+  console.log('invoice: ' + JSON.stringify(invoice));
+  console.log(invoice);
 
   res.render('creator/post/post', {
     title: 'View Post',
     creator,
     content,
-    authorized
+    authorized,
+    invoice
   });
 };
