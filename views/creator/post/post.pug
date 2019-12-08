@@ -12,3 +12,22 @@ block content
             a(href=`/creator/${creator._id}/subscribe`) click here&nbsp
             | to subscribe to this creator.
         p.text-center.word-wrap= invoice.payment_request
+
+        hr
+        p.text-center.word-wrap
+            | After paying the invoice, paste your preimage below
+        // invoice form
+        form(action=`/creator/${creator._id}/post/postCheck`, method='POST')
+            input(type='hidden', name='_csrf', value=_csrf)
+            .form-group.row
+                label(class='col-md-2 col-form-label font-weight-bold', for='macaroon') Macaroon
+                .col-md-8
+                    input.form-control(type='text', name='macaroon', id='macaroon', value=macaroon, readonly)
+            .form-group.row
+                label(class='col-md-2 col-form-label font-weight-bold', for='preimage') Preimage
+                .col-md-8
+                    textarea.form-control(name='preimage', id='preimage', rows='1', required)
+            .form-group
+                .offset-md-2.col-md-8.p-1
+                    button.btn.btn-primary(type='submit')
+                        | Post

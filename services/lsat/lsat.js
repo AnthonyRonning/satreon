@@ -31,8 +31,39 @@ exports.generateMacaroon = async (creatorId, invoice) => {
 };
 
 
-exports.verifyMacaroon = async (macaroonBase64, preimage, creatorId) => {
+exports.generatePostMacaroon = async (postId, invoice) => {
+  const rootKey = process.env.MACAROON_ROOT_KEY;
+  const location = process.env.BASE_URL;
+  const currentDate = new Date();
+  const expiresDate = new Date(currentDate.setMonth(currentDate.getMonth() + 1));
+
+  const newMacaroon = Macaroon.newMacaroon({
+    identifier: postId, location, rootKey, version: 2
+  });
+  const subscriberCaveat = `post = ${postId}`;
+  const expiresCaveat = `expires = ${expiresDate.toISOString()}`;
+
+  // hash invoice
+  console.log('received invoice to generate a macaroon from: ' + invoice);
+  console.log('r_hash string: ' + invoice.r_hash.toString('hex'));
+  const preimageHashCaveat = `preimageHash = ${invoice.r_hash.toString('hex')}`;
+
+  newMacaroon.addFirstPartyCaveat(subscriberCaveat);
+  newMacaroon.addFirstPartyCaveat(expiresCaveat);
+  newMacaroon.addFirstPartyCaveat(preimageHashCaveat);
+
+  console.log('Created new macaroon: ');
+  console.log(newMacaroon.exportJSON());
+  console.log(newMacaroon.exportBinary());
+  console.log(Macaroon.bytesToBase64(newMacaroon.exportBinary()));
+
+  return Macaroon.bytesToBase64(newMacaroon.exportBinary());
+};
+
+
+exports.verifyMacaroon = async (macaroonBase64, preimage, creatorId, postId) => {
   let hasSubscriberAccess = false;
+  let hasPostAccess = false;
   let macaroonStillValid = false;
   let hasPaid = false;
   let isValid = false;
@@ -45,6 +76,8 @@ exports.verifyMacaroon = async (macaroonBase64, preimage, creatorId) => {
   const rootKey = process.env.MACAROON_ROOT_KEY;
 
   const subscriberCaveat = `subscriber = ${creatorId}`;
+  const postCaveat = `post = ${postId}`;
+  console.log(postCaveat);
 
   // function for checking macaroon cavs
   const checkMacaroon = function (cav) {
@@ -52,6 +85,9 @@ exports.verifyMacaroon = async (macaroonBase64, preimage, creatorId) => {
     if (cav === subscriberCaveat) {
       console.log('has correct subscriber caveat');
       hasSubscriberAccess = true;
+    } else if (cav === postCaveat) {
+      console.log('has correct post caveat');
+      hasPostAccess = true;
     } else if (cav.startsWith('expires = ')) {
       console.log('checking expiration date of macaroon..');
 
@@ -103,8 +139,9 @@ exports.verifyMacaroon = async (macaroonBase64, preimage, creatorId) => {
 
   console.log(`This macaroon is valid and signed by this server: ${isValid}`);
   console.log(`This macaroon has subscriber access: ${hasSubscriberAccess}`);
+  console.log(`This macaroon has post access: ${hasPostAccess}`);
   console.log(`This macaroon is not expired: ${macaroonStillValid}`);
   console.log(`This macaroon has been paid for: ${hasPaid}`);
 
-  return isValid && hasSubscriberAccess && macaroonStillValid && hasPaid;
+  return isValid && (hasSubscriberAccess || hasPostAccess) && macaroonStillValid && hasPaid;
 };

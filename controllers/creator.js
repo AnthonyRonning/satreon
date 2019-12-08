@@ -101,7 +101,7 @@ exports.viewPost = async (req, res) => {
     for (let i = 0; i < macaroonList.length; i++) {
       let macaroon = macaroonList[i].split(':')[0];
       let preimage = macaroonList[i].split(':')[1];
-      authorized = await lsat.verifyMacaroon(macaroon, preimage, creator._id);
+      authorized = await lsat.verifyMacaroon(macaroon, preimage, creator._id, content._id);
       if (authorized) break;
     }
   } catch (e) {
@@ -113,14 +113,52 @@ exports.viewPost = async (req, res) => {
   console.log('invoice: ' + JSON.stringify(invoice));
   console.log(invoice);
 
+  // create a macaroon to give to the user
+  const macaroon = await lsat.generatePostMacaroon(content._id.toString(), invoice);
+
   res.render('creator/post/post', {
     title: 'View Post',
     creator,
     content,
     authorized,
-    invoice
+    invoice,
+    macaroon
   });
 };
+
+
+/**
+ * GET /creator/:userId/subscribeCheck
+ * Check the subscription of a user
+ */
+exports.postCheck = async (req, res) => {
+  const macaroon = req.body.macaroon;
+  const preimage = req.body.preimage;
+
+  console.log('retrieved macaroon: ' + macaroon);
+  console.log('retrieved preimage: ' + preimage);
+
+  // get the creator
+  const getCreator = new Promise((res, rej) => {
+    console.log(req);
+    User.findById(req.params.userId, (err, user) => {
+      if (err) console.error(err);
+
+      console.log(`got creator: ${user}`);
+      res(user);
+    });
+  });
+
+  const creator = await getCreator;
+
+  res.render('creator/post/postCheck', {
+    title: 'Bought Post',
+    creator,
+    macaroon,
+    preimage
+  });
+};
+
 
 
 /**

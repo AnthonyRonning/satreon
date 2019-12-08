@@ -144,6 +144,7 @@ app.get('/content/create', contentController.createContent);
 app.post('/content/create', contentController.postContent);
 app.get('/creator/:userId', creatorController.viewCreator);
 app.get('/creator/:userId/post/:postId', creatorController.viewPost);
+app.post('/creator/:userId/post/postCheck', creatorController.postCheck);
 app.get('/creator/:userId/subscribe', creatorController.subscribe);
 app.post('/creator/:userId/subscribeCheck', creatorController.subscribeCheck);
 app.post('/contact', contactController.postContact);
