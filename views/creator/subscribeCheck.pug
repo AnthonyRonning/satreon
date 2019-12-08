@@ -1,0 +1,39 @@
+extends ../layout
+
+block content
+    h1= `Subscribe to ${creator.profile.name}'s Profile`
+    p.lead
+        | Subscribed!
+    hr
+    h2.text-center You have subscribed to this creator for 1 month!
+    // div(id="macaroon-and-preimage")
+
+
+    script(src=source)
+    script.
+        var macaroon = '!{macaroon}';
+        var preimage = '!{preimage}';
+        var macaroonAndPreimage = '!{macaroon} and !{preimage}';
+        // document.getElementById("macaroon-and-preimage").innerHTML = macaroonAndPreimage;
+
+        if (macaroon && preimage) {
+          console.log(macaroon);
+          console.log(preimage);
+
+          // Check browser support
+          if (typeof (Storage) !== "undefined") {
+            // Store
+            // localStorage.setItem("macaroons", macaroon + ':' + preimage);
+            appendToStorage("macaroons", macaroon + ':' + preimage + ',');
+          } else {
+            console.error("Sorry, your browser does not support Web Storage...");
+          }
+
+          function appendToStorage(name, data) {
+            var old = localStorage.getItem(name);
+            if (old === null) old = "";
+            localStorage.setItem(name, old + data);
+          }
+        }
+        else
+            console.log('parameters not passed');

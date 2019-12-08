@@ -9,4 +9,22 @@ block content
     hr
     h2.text-center Pay the invoice to subscribe for a month!
     p.text-center.word-wrap= invoice.payment_request
-    p.text-center.word-wrap= macaroon
+    // p.text-center.word-wrap= macaroon
+    hr
+    p.text-center.word-wrap
+        | After paying the invoice, paste your preimage below
+    // invoice form
+    form(action=`/creator/${creator._id}/subscribeCheck`, method='POST')
+        input(type='hidden', name='_csrf', value=_csrf)
+        .form-group.row
+            label(class='col-md-2 col-form-label font-weight-bold', for='macaroon') Macaroon
+            .col-md-8
+                input.form-control(type='text', name='macaroon', id='macaroon', value=macaroon, readonly)
+        .form-group.row
+            label(class='col-md-2 col-form-label font-weight-bold', for='preimage') Preimage
+            .col-md-8
+                textarea.form-control(name='preimage', id='preimage', rows='1', required)
+        .form-group
+            .offset-md-2.col-md-8.p-1
+                button.btn.btn-primary(type='submit')
+                    | Post

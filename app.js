@@ -145,6 +145,7 @@ app.post('/content/create', contentController.postContent);
 app.get('/creator/:userId', creatorController.viewCreator);
 app.get('/creator/:userId/post/:postId', creatorController.viewPost);
 app.get('/creator/:userId/subscribe', creatorController.subscribe);
+app.post('/creator/:userId/subscribeCheck', creatorController.subscribeCheck);
 app.post('/contact', contactController.postContact);
 app.get('/account/verify', passportConfig.isAuthenticated, userController.getVerifyEmail);
 app.get('/account/verify/:token', passportConfig.isAuthenticated, userController.getVerifyEmailToken);

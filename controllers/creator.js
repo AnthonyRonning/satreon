@@ -71,7 +71,8 @@ exports.viewPost = async (req, res) => {
   const content = await getContentById;
 
   // check to see if the user is authorized to see
-  const preimage = 'bdd6e2403f9f9140bdca9f0a47e3458a24d5106cb20a74879631a9d025cf38c6';
+  // const preimage = 'bdd6e2403f9f9140bdca9f0a47e3458a24d5106cb20a74879631a9d025cf38c6';
+  const preimage = '';
   const macaroon = 'AgEZaHR0cHM6Ly9lZGQwZWNjMS5uZ3Jvay5pbwIYNWRlYWNiZjZjZTNlMTU4NDc0ZTNjZDQ5AAIlc3Vic2NyaWJlciA9IDVkZWFjYmY2Y2UzZTE1ODQ3NGUzY2Q0OQACImV4cGlyZXMgPSAyMDIwLTAxLTA4VDE3OjM1OjE1LjE1MFoAAk9wcmVpbWFnZUhhc2ggPSAxOWIzMzRhOWJkMzRjNzRjNjg5NTEwYWIwNzI5OTgwYmIwMGUxMTk2ZjM4YzE4N2Q3NWMyMWZiN2ZjNmEwNmYyAAAGIAj7DJg3AsbZia5s7sbeSi2EgFRKKoUhNewocnjGozxA';
   const authorized = await lsat.verifyMacaroon(macaroon, preimage, creator._id);
 
@@ -122,5 +123,38 @@ exports.subscribe = async (req, res) => {
     creator,
     invoice,
     macaroon
+  });
+};
+
+
+/**
+ * GET /creator/:userId/subscribeCheck
+ * Check the subscription of a user
+ */
+exports.subscribeCheck = async (req, res) => {
+  const macaroon = req.body.macaroon;
+  const preimage = req.body.preimage;
+
+  console.log('retrieved macaroon: ' + macaroon);
+  console.log('retrieved preimage: ' + preimage);
+
+  // get the creator
+  const getCreator = new Promise((res, rej) => {
+    console.log(req);
+    User.findById(req.params.userId, (err, user) => {
+      if (err) console.error(err);
+
+      console.log(`got creator: ${user}`);
+      res(user);
+    });
+  });
+
+  const creator = await getCreator;
+
+  res.render('creator/subscribeCheck', {
+    title: 'Subscribed to Creator',
+    creator,
+    macaroon,
+    preimage
   });
 };
