@@ -36,7 +36,12 @@ exports.verifyMacaroon = async (macaroonBase64, preimage, creatorId) => {
   let macaroonStillValid = false;
   let hasPaid = false;
   let isValid = false;
-  const macaroon = Macaroon.importMacaroon(macaroonBase64);
+  let macaroon = '';
+  try {
+    macaroon = Macaroon.importMacaroon(macaroonBase64);
+  } catch (e) {
+    return false;
+  }
   const rootKey = process.env.MACAROON_ROOT_KEY;
 
   const subscriberCaveat = `subscriber = ${creatorId}`;

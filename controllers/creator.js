@@ -46,6 +46,7 @@ exports.viewCreator = async (req, res) => {
 exports.viewPost = async (req, res) => {
   // query variables
   const macaroons = req.query.macaroons;
+  let macaroonList = [];
 
   let firstMacaroon = '';
   let firstPreimage = '';
@@ -55,7 +56,7 @@ exports.viewPost = async (req, res) => {
   } else {
     console.log('macaroon from the query: ' + macaroons);
 
-    const macaroonList = macaroons.split(',');
+    macaroonList = macaroons.split(',');
 
     // first macaroon : preimage pair
     firstMacaroon = macaroonList[0].split(':')[0];
@@ -92,12 +93,17 @@ exports.viewPost = async (req, res) => {
 
   // check to see if the user is authorized to see
   // const preimage = 'bdd6e2403f9f9140bdca9f0a47e3458a24d5106cb20a74879631a9d025cf38c6';
-  const preimage = firstPreimage || '';
-  const macaroon = firstMacaroon || 'AgEZaHR0cHM6Ly9lZGQwZWNjMS5uZ3Jvay5pbwIYNWRlYWNiZjZjZTNlMTU4NDc0ZTNjZDQ5AAIlc3Vic2NyaWJlciA9IDVkZWFjYmY2Y2UzZTE1ODQ3NGUzY2Q0OQACImV4cGlyZXMgPSAyMDIwLTAxLTA4VDE3OjM1OjE1LjE1MFoAAk9wcmVpbWFnZUhhc2ggPSAxOWIzMzRhOWJkMzRjNzRjNjg5NTEwYWIwNzI5OTgwYmIwMGUxMTk2ZjM4YzE4N2Q3NWMyMWZiN2ZjNmEwNmYyAAAGIAj7DJg3AsbZia5s7sbeSi2EgFRKKoUhNewocnjGozxA';
+  // const preimage = firstPreimage || '';
+  // const macaroon = firstMacaroon || 'AgEZaHR0cHM6Ly9lZGQwZWNjMS5uZ3Jvay5pbwIYNWRlYWNiZjZjZTNlMTU4NDc0ZTNjZDQ5AAIlc3Vic2NyaWJlciA9IDVkZWFjYmY2Y2UzZTE1ODQ3NGUzY2Q0OQACImV4cGlyZXMgPSAyMDIwLTAxLTA4VDE3OjM1OjE1LjE1MFoAAk9wcmVpbWFnZUhhc2ggPSAxOWIzMzRhOWJkMzRjNzRjNjg5NTEwYWIwNzI5OTgwYmIwMGUxMTk2ZjM4YzE4N2Q3NWMyMWZiN2ZjNmEwNmYyAAAGIAj7DJg3AsbZia5s7sbeSi2EgFRKKoUhNewocnjGozxA';
 
   let authorized = false;
   try {
-    authorized = await lsat.verifyMacaroon(macaroon, preimage, creator._id);
+    for (let i = 0; i < macaroonList.length; i++) {
+      let macaroon = macaroonList[i].split(':')[0];
+      let preimage = macaroonList[i].split(':')[1];
+      authorized = await lsat.verifyMacaroon(macaroon, preimage, creator._id);
+      if (authorized) break;
+    }
   } catch (e) {
     authorized = false;
   }
