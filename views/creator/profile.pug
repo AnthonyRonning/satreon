@@ -10,6 +10,24 @@ block content
             =  creator.profile.supporterAmount
             |  SATS per month
     hr
+
+    script.
+      var creator = '!{creator}';
+      var content = '!{content}';
+
+    script.
+        var something = function () {
+            // url = `${creator._id}/post/${content._id}?macaroons=123`;
+          url = `123/post/122?macaroons=123`;
+          window.location = url;
+        };
+
+    script.
+        function something1(creatorId, contentId){
+            url = `${creatorId}/post/${contentId}?macaroons=${localStorage.getItem("macaroons")}`;
+            window.location = url;
+        }
+
     .row
         each content in contents
             .col-md-6
@@ -19,4 +37,24 @@ block content
                     = content.price
                     |  SATS
                 p
-                    a.btn.btn-raised(href=`/creator/${creator._id}/post/${content._id}`, role='button') View details »
+                    // a.btn.btn-raised(href=`/creator/${creator._id}/post/${content._id}?macaroons=${macaroons}`, role='button') View details »
+                    button(type='button' class=' btn btn-raised' value="Read More" onclick='something1(' + '"' + creator._id + '"' + ',' + '"' + content._id + '"' + ')') View details »
+    script.
+        // Check browser support
+        var macaroons = 'test';
+        if (typeof (Storage) !== "undefined") {
+          // Store
+          // localStorage.setItem("macaroons", macaroon + ':' + preimage);
+          // appendToStorage("macaroons", macaroon + ':' + preimage + ',');
+          macaroons = localStorage.getItem("macaroons");
+          console.log('got macaroons: ' + macaroons);
+        } else {
+          console.error("Sorry, your browser does not support Web Storage...");
+        }
+
+        function appendToStorage(name, data) {
+          var old = localStorage.getItem(name);
+          if (old === null) old = "";
+          localStorage.setItem(name, old + data);
+        }
+    p #{macaroons}

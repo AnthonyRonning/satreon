@@ -44,6 +44,26 @@ exports.viewCreator = async (req, res) => {
  * View a creator's post.
  */
 exports.viewPost = async (req, res) => {
+  // query variables
+  const macaroons = req.query.macaroons;
+
+  let firstMacaroon = '';
+  let firstPreimage = '';
+
+  if (macaroons === null) {
+    console.log('macaroons empty');
+  } else {
+    console.log('macaroon from the query: ' + macaroons);
+
+    const macaroonList = macaroons.split(',');
+
+    // first macaroon : preimage pair
+    firstMacaroon = macaroonList[0].split(':')[0];
+    firstPreimage = macaroonList[0].split(':')[1];
+  }
+
+  console.log('first macaroon:' + firstMacaroon);
+  console.log('first preimage: ' + firstPreimage);
 
   // get the creator
   const getCreator = new Promise((res, rej) => {
@@ -72,9 +92,15 @@ exports.viewPost = async (req, res) => {
 
   // check to see if the user is authorized to see
   // const preimage = 'bdd6e2403f9f9140bdca9f0a47e3458a24d5106cb20a74879631a9d025cf38c6';
-  const preimage = '';
-  const macaroon = 'AgEZaHR0cHM6Ly9lZGQwZWNjMS5uZ3Jvay5pbwIYNWRlYWNiZjZjZTNlMTU4NDc0ZTNjZDQ5AAIlc3Vic2NyaWJlciA9IDVkZWFjYmY2Y2UzZTE1ODQ3NGUzY2Q0OQACImV4cGlyZXMgPSAyMDIwLTAxLTA4VDE3OjM1OjE1LjE1MFoAAk9wcmVpbWFnZUhhc2ggPSAxOWIzMzRhOWJkMzRjNzRjNjg5NTEwYWIwNzI5OTgwYmIwMGUxMTk2ZjM4YzE4N2Q3NWMyMWZiN2ZjNmEwNmYyAAAGIAj7DJg3AsbZia5s7sbeSi2EgFRKKoUhNewocnjGozxA';
-  const authorized = await lsat.verifyMacaroon(macaroon, preimage, creator._id);
+  const preimage = firstPreimage || '';
+  const macaroon = firstMacaroon || 'AgEZaHR0cHM6Ly9lZGQwZWNjMS5uZ3Jvay5pbwIYNWRlYWNiZjZjZTNlMTU4NDc0ZTNjZDQ5AAIlc3Vic2NyaWJlciA9IDVkZWFjYmY2Y2UzZTE1ODQ3NGUzY2Q0OQACImV4cGlyZXMgPSAyMDIwLTAxLTA4VDE3OjM1OjE1LjE1MFoAAk9wcmVpbWFnZUhhc2ggPSAxOWIzMzRhOWJkMzRjNzRjNjg5NTEwYWIwNzI5OTgwYmIwMGUxMTk2ZjM4YzE4N2Q3NWMyMWZiN2ZjNmEwNmYyAAAGIAj7DJg3AsbZia5s7sbeSi2EgFRKKoUhNewocnjGozxA';
+
+  let authorized = false;
+  try {
+    authorized = await lsat.verifyMacaroon(macaroon, preimage, creator._id);
+  } catch (e) {
+    authorized = false;
+  }
 
   // create an invoice for the user to pay
   const invoice = await lnrpc.addInvoice(content.price);
