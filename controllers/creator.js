@@ -113,7 +113,7 @@ exports.viewPost = async (req, res) => {
   const reqBottlePay = {
     user: creator
   };
-  
+
   let invoice = null;
 
   // hack to try twice, 1 after refresh token if needed

@@ -1,5 +1,5 @@
 
-# Litreon
+# Satreon
 
 ## Patreon for lightning payments & anonymous supporters
 
@@ -7,11 +7,11 @@
 ### Description 
 [Youtube Link](https://youtu.be/c6X789EmCFU)
 
-Litreon allows content creators to earn satoshi's from their followers via the lightning network. Litreon is unique in that it allows supports to stay anonymous and not have an identity or account tied to those they wish to support. Anonymous users are given signed LSATs (Lightning Service Authentication Tokens) for viewing access and as long as they resupply a valid LSAT with necessary permissions + a preimage to the invoice r_hash in the LSAT, then they are allowed to view/download whatever it is they paid to access. 
+Satreon allows content creators to earn satoshi's from their followers via the lightning network. Satreon is unique in that it allows supports to stay anonymous and not have an identity or account tied to those they wish to support. Anonymous users are given signed LSATs (Lightning Service Authentication Tokens) for viewing access and as long as they resupply a valid LSAT with necessary permissions + a preimage to the invoice r_hash in the LSAT, then they are allowed to view/download whatever it is they paid to access. 
 
-Litreon allows supporters to pay for months of access to a specific creator, or pay for individual posts. As long as they provide a signed LSAT with the identifier of whatever it is they're paying for, plus the preimage, they they are allowed to view. Paying for a month at a time allows them to view all posts for a given creator.
+Satreon allows supporters to pay for months of access to a specific creator, or pay for individual posts. As long as they provide a signed LSAT with the identifier of whatever it is they're paying for, plus the preimage, they they are allowed to view. Paying for a month at a time allows them to view all posts for a given creator.
 
-Litreon does not need to keep a database of invoices / LSATs / macaroons in order to allow anonymous access. As long as an LSAT was signed by my server's root key, and has 'caveats' that show what permission I assigned to that LSAT, I can then allow them appropriate access to things.
+Satreon does not need to keep a database of invoices / LSATs / macaroons in order to allow anonymous access. As long as an LSAT was signed by my server's root key, and has 'caveats' that show what permission I assigned to that LSAT, I can then allow them appropriate access to things.
 
 An example signed LSAT with assigned permissions only to a specific post: 
 
