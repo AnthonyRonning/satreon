@@ -1,3 +1,4 @@
+const api = require('./api');
 const User = require('../models/User');
 const Content = require('../models/Content');
 const lnrpc = require('../services/lnd/lnd');
@@ -108,10 +109,24 @@ exports.viewPost = async (req, res) => {
     authorized = false;
   }
 
+  // create bottlepay invoice for user to pay
+  const reqBottlePay = {
+    user: creator
+  };
+  
+  let invoice = null;
+
+  // hack to try twice, 1 after refresh token if needed
+  try {
+    invoice = await api.getBottlepayInvoice(reqBottlePay, content.price);
+  } catch (error) {
+    invoice = await api.getBottlepayInvoice(reqBottlePay, content.price);
+  }
+
   // create an invoice for the user to pay
-  const invoice = await lnrpc.addInvoice(content.price);
-  console.log('invoice: ' + JSON.stringify(invoice));
-  console.log(invoice);
+  // const invoice = await lnrpc.addInvoice(content.price);
+  // console.log('invoice: ' + JSON.stringify(invoice));
+  // console.log(invoice);
 
   // create a macaroon to give to the user
   const macaroon = await lsat.generatePostMacaroon(content._id.toString(), invoice);
@@ -180,10 +195,25 @@ exports.subscribe = async (req, res) => {
 
   const creator = await getCreator;
 
-  // create an invoice for the user to pay
-  const invoice = await lnrpc.addInvoice(creator.profile.supporterAmount);
-  console.log('invoice: ' + JSON.stringify(invoice));
+  // create bottlepay invoice for user to pay
+  const reqBottlePay = {
+    user: creator
+  };
+  let invoice = null;
+
+  // hack to try twice, 1 after refresh token if needed
+  try {
+    invoice = await api.getBottlepayInvoice(reqBottlePay, creator.profile.supporterAmount);
+  } catch (error) {
+    invoice = await api.getBottlepayInvoice(reqBottlePay, creator.profile.supporterAmount);
+  }
+  console.log('retrieved from bottlepay: ');
   console.log(invoice);
+
+  // create an invoice for the user to pay
+  // const invoice = await lnrpc.addInvoice(creator.profile.supporterAmount);
+  // console.log('invoice: ' + JSON.stringify(invoice));
+  // console.log(invoice);
 
   // create a macaroon to give to the user
   const macaroon = await lsat.generateMacaroon(creator._id.toString(), invoice);

@@ -609,6 +609,9 @@ passport.use('bottlepay', new OAuth2Strategy({
   passReqToCallback: true
 },
 (req, accessToken, refreshToken, profile, done) => {
+  console.log('access token: ' + accessToken);
+  console.log('refresh token: ' + refreshToken);
+
   if (req.user) {
     User.findById(req.user._id, (err, user) => {
       if (err) {
@@ -664,7 +667,8 @@ passport.use('bottlepay', new OAuth2Strategy({
               }
               user.tokens.push({
                 kind: 'bottlepay',
-                accessToken
+                accessToken,
+                refreshToken
               });
               user.save((err) => {
                 done(err, user);
@@ -678,7 +682,8 @@ passport.use('bottlepay', new OAuth2Strategy({
             user.email = userProfile.email ? userProfile.email : `${userProfile.id}@bottlepay.com`; // bottlepay does not disclose emails, prevent duplicate keys
             user.tokens.push({
               kind: 'bottlepay',
-              accessToken
+              accessToken,
+              refreshToken
             });
             user.profile.name = userProfile.name;
             user.profile.picture = userProfile.avatar;

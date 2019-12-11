@@ -121,6 +121,8 @@ exports.verifyMacaroon = async (macaroonBase64, preimage, creatorId, postId) => 
         hasPaid = true;
       } else {
         console.log('User did not provide a valid preimage for this macaroon.');
+        console.log('supplied: ' + preimage + ':' + userPreImageHash);
+        console.log('cav macaroon: ' + macaroonPreImageHash);
       }
     } else {
       console.log(`cav not recognized: ${cav}`);

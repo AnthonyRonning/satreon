@@ -15,6 +15,7 @@ const axios = require('axios');
 const { google } = require('googleapis');
 const Quickbooks = require('node-quickbooks');
 const validator = require('validator');
+const User = require('../models/User');
 
 Quickbooks.setOauthVersion('2.0');
 
@@ -720,6 +721,85 @@ exports.postPinterest = (req, res, next) => {
       res.redirect('/api/pinterest');
     });
 };
+
+
+/**
+ * GET /api/bottlepay
+ * Bottlepay API example.
+ */
+exports.getBottlepayInvoice = async (req, amount) => {
+  console.log('user tokens: ');
+  console.log(req.user.tokens);
+
+  // find last token
+  const token = req.user.tokens.slice().reverse().find((token) => token.kind === 'bottlepay');
+  const { accessToken } = token;
+  const { refreshToken } = token;
+  console.log(`users last access token: ${accessToken}`);
+  console.log(`users last access refresh: ${refreshToken}`);
+
+  const config = {
+    headers: { Authorization: `Bearer ${accessToken}` }
+  };
+
+  let data = null;
+
+  try {
+    data = await axios.get(`https://bottle.dev/api/wallet/invoice?value=${amount}`, config)
+      .then(({ data }) => {
+        console.log(`get /api/wallet/invoice :${data}`);
+        console.log(data);
+
+        // turn r_hash into the correct value
+        data.r_hash = Buffer.from(data.r_hash, 'base64')
+          .toString('hex');
+        return data;
+      });
+  } catch (error) {
+    if (error.response.status === 401) {
+      console.log('received a 401 authenticated error. using refresh token');
+
+      const refreshTokenPayload = {
+        grant_type: 'refresh_token',
+        refresh_token: refreshToken,
+        client_id: process.env.BOTTLEPAY_ID,
+        client_secret: process.env.BOTTLEPAY_SECRET,
+        redirect_uri: process.env.BOTTLEPAY_REDIRECT_URL
+      };
+
+      data = await axios.post('https://bottle.dev/oauth/token', refreshTokenPayload)
+        .then(async ({ data }) => {
+          console.log(data);
+
+          // save the new tokens
+          await User.findById(req.user._id, async (err, user) => {
+            if (err) {
+              throw err;
+            }
+            user.tokens.push({
+              kind: 'bottlepay',
+              accessToken: data.access_token,
+              refreshToken: data.refresh_token
+            });
+            await user.save(async (err) => {
+              // now redo the command
+              req.user = user;
+              const finalData = await this.getBottlepayInvoice(req, amount);
+              return finalData;
+            });
+          });
+        });
+    } else {
+      console.log(error);
+    }
+  }
+
+  console.log('returning from api:');
+  console.log(data);
+  if (!data) throw 'fucking thing';
+  return data;
+};
+
 
 exports.getHereMaps = (req, res) => {
   const imageMapURL = `https://image.maps.api.here.com/mia/1.6/mapview?\
