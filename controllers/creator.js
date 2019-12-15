@@ -3,6 +3,7 @@ const User = require('../models/User');
 const Content = require('../models/Content');
 const lnrpc = require('../services/lnd/lnd');
 const lsat = require('../services/lsat/lsat');
+const createLnrpc = require('lnrpc');
 
 /**
  * GET /creator/:userId
@@ -110,6 +111,7 @@ exports.viewPost = async (req, res) => {
   }
 
   // create bottlepay invoice for user to pay
+  /* TODO remove all of bottlepay :(
   const reqBottlePay = {
     user: creator
   };
@@ -122,6 +124,17 @@ exports.viewPost = async (req, res) => {
   } catch (error) {
     invoice = await api.getBottlepayInvoice(reqBottlePay, content.price);
   }
+  */
+
+  console.log('Grabbing invoice from creators node: ');
+  const lnrcpCustom = await createLnrpc({
+    server: creator.lndUrl,
+    cert: creator.tlsCert,
+    macaroon: creator.invoiceMacaroon,
+  });
+
+  const invoice = await lnrcpCustom.addInvoice({ value: content.price });
+  console.log(invoice);
 
   // create an invoice for the user to pay
   // const invoice = await lnrpc.addInvoice(content.price);
@@ -195,19 +208,14 @@ exports.subscribe = async (req, res) => {
 
   const creator = await getCreator;
 
-  // create bottlepay invoice for user to pay
-  const reqBottlePay = {
-    user: creator
-  };
-  let invoice = null;
+  console.log('Grabbing invoice from creators node: ');
+  const lnrcpCustom = await createLnrpc({
+    server: creator.lndUrl,
+    cert: creator.tlsCert,
+    macaroon: creator.invoiceMacaroon,
+  });
 
-  // hack to try twice, 1 after refresh token if needed
-  try {
-    invoice = await api.getBottlepayInvoice(reqBottlePay, creator.profile.supporterAmount);
-  } catch (error) {
-    invoice = await api.getBottlepayInvoice(reqBottlePay, creator.profile.supporterAmount);
-  }
-  console.log('retrieved from bottlepay: ');
+  const invoice = await lnrcpCustom.addInvoice({ value: creator.profile.supporterAmount });
   console.log(invoice);
 
   // create an invoice for the user to pay

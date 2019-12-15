@@ -4,7 +4,7 @@ block content
   .pb-2.mt-2.mb-4.border-bottom
     h3 Profile Information
 
-  form(action='/account/profile', method='POST')
+  form(action='/account/profile', method='POST', enctype='multipart/form-data')
     input(type='hidden', name='_csrf', value=_csrf)
     .form-group.row
       label.col-md-3.col-form-label.font-weight-bold.text-right(for='email') Email
@@ -37,7 +37,19 @@ block content
     .form-group.row
       label.col-md-3.col-form-label.font-weight-bold.text-right(for='supporterAmount') supporter amount per month
       .col-md-7
-        input.form-control(type='text', name='supporterAmount', id='supporterAmount', value=user.profile.supporterAmount)
+        input.form-control(type='text', name='supporterAmount', id='supporterAmount', value=user.profile.supporterAmount, required)
+    .form-group.row
+      label.col-md-3.col-form-label.font-weight-bold.text-right(for='lndUrl') LND Node URL
+      .col-md-7
+        input.form-control(type='text', name='lndUrl', id='lndUrl', value=user.lndUrl, required)
+    .form-group.row
+      label.col-md-3.col-form-label.font-weight-bold.text-right(for='invoiceMacaroon') LND Invoice Macaroon
+      .col-md-7
+        input.form-control(type='file', name='invoiceMacaroon', id='invoiceMacaroon', required)
+    .form-group.row
+      label.col-md-3.col-form-label.font-weight-bold.text-right(for='tlsCert') LND TLS Cert
+      .col-md-7
+        input.form-control(type='file', name='tlsCert', id='tlsCert', required)
     .form-group.row
       label.col-md-3.col-form-label.font-weight-bold.text-right Gravatar
       .col-sm-4

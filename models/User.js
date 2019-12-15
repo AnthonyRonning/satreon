@@ -29,8 +29,12 @@ const userSchema = new mongoose.Schema({
     website: String,
     picture: String,
     description: String,
-    supporterAmount: Number
-  }
+    supporterAmount: Number,
+  },
+
+  lndUrl: String,
+  tlsCert: String,
+  invoiceMacaroon: String
 }, { timestamps: true });
 
 /**

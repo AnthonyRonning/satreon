@@ -5,7 +5,9 @@ const passport = require('passport');
 const _ = require('lodash');
 const validator = require('validator');
 const mailChecker = require('mailchecker');
+const fs = require('fs').promises;
 const User = require('../models/User');
+const createLnrpc = require('lnrpc');
 
 const randomBytesAsync = promisify(crypto.randomBytes);
 
@@ -130,7 +132,7 @@ exports.getAccount = (req, res) => {
  * POST /account/profile
  * Update profile information.
  */
-exports.postUpdateProfile = (req, res, next) => {
+exports.postUpdateProfile = async (req, res, next) => {
   const validationErrors = [];
   if (!validator.isEmail(req.body.email)) validationErrors.push({ msg: 'Please enter a valid email address.' });
 
@@ -139,6 +141,28 @@ exports.postUpdateProfile = (req, res, next) => {
     return res.redirect('/account');
   }
   req.body.email = validator.normalizeEmail(req.body.email, { gmail_remove_dots: false });
+
+  console.log('displaying lnd node info...:');
+  console.log(req.body.lndUrl);
+  console.log(req.body.invoiceMacaroon);
+  console.log(req.files.invoiceMacaroon[0]);
+  console.log(req.files.tlsCert[0]);
+  const uploadedMacaroonFile = await fs.readFile(req.files.invoiceMacaroon[0].path);
+  console.log(uploadedMacaroonFile.toString('hex'));
+  const uploadedTlsCert = await fs.readFile(req.files.tlsCert[0].path, 'binary');
+  console.log(uploadedTlsCert);
+
+  // TEST LND
+  console.log('Testing LND connection: ');
+  const lnrcpCustom = await createLnrpc({
+    server: req.body.lndUrl,
+    cert: uploadedTlsCert,
+    macaroon: uploadedMacaroonFile.toString('hex'),
+  });
+
+  const invoiceTest = await lnrcpCustom.addInvoice({ value: 1 });
+  console.log(invoiceTest);
+
 
   User.findById(req.user.id, (err, user) => {
     if (err) { return next(err); }
@@ -150,6 +174,9 @@ exports.postUpdateProfile = (req, res, next) => {
     user.profile.website = req.body.website || '';
     user.profile.description = req.body.description || '';
     user.profile.supporterAmount = req.body.supporterAmount || '';
+    user.lndUrl = req.body.lndUrl || '';
+    user.invoiceMacaroon = uploadedMacaroonFile.toString('hex') || '';
+    user.tlsCert = uploadedTlsCert || '';
     user.save((err) => {
       if (err) {
         if (err.code === 11000) {
