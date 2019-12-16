@@ -1,3 +1,6 @@
+# personal gitignore
+uploads/**
+
 lib-cov
 *.seed
 *.log

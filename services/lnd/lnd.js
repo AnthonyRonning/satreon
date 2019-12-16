@@ -68,5 +68,16 @@ exports.addInvoice = async (value) => {
   return lnrcpCustom.addInvoice({ value });
 };
 
+exports.createInvoice = async (creator, amount) => {
+  const lnrcpCustom = await createLnrpc({
+    server: creator.lndUrl,
+    cert: creator.tlsCert,
+    macaroon: creator.invoiceMacaroon,
+  });
+
+  const invoice = await lnrcpCustom.addInvoice({ value: amount });
+  return invoice;
+}
+
 
 exports.lnrpc = createLnrpc;

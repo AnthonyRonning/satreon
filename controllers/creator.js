@@ -3,7 +3,6 @@ const User = require('../models/User');
 const Content = require('../models/Content');
 const lnrpc = require('../services/lnd/lnd');
 const lsat = require('../services/lsat/lsat');
-const createLnrpc = require('lnrpc');
 
 /**
  * GET /creator/:userId
@@ -47,7 +46,7 @@ exports.viewCreator = async (req, res) => {
  */
 exports.viewPost = async (req, res) => {
   // query variables
-  const macaroons = req.query.macaroons;
+  const { macaroons } = req.query;
   let macaroonList = [];
 
   let firstMacaroon = '';
@@ -56,7 +55,7 @@ exports.viewPost = async (req, res) => {
   if (macaroons === null) {
     console.log('macaroons empty');
   } else {
-    console.log('macaroon from the query: ' + macaroons);
+    console.log(`macaroon from the query: ${macaroons}`);
 
     macaroonList = macaroons.split(',');
 
@@ -65,8 +64,8 @@ exports.viewPost = async (req, res) => {
     firstPreimage = macaroonList[0].split(':')[1];
   }
 
-  console.log('first macaroon:' + firstMacaroon);
-  console.log('first preimage: ' + firstPreimage);
+  console.log(`first macaroon:${firstMacaroon}`);
+  console.log(`first preimage: ${firstPreimage}`);
 
   // get the creator
   const getCreator = new Promise((res, rej) => {
@@ -94,15 +93,11 @@ exports.viewPost = async (req, res) => {
   const content = await getContentById;
 
   // check to see if the user is authorized to see
-  // const preimage = 'bdd6e2403f9f9140bdca9f0a47e3458a24d5106cb20a74879631a9d025cf38c6';
-  // const preimage = firstPreimage || '';
-  // const macaroon = firstMacaroon || 'AgEZaHR0cHM6Ly9lZGQwZWNjMS5uZ3Jvay5pbwIYNWRlYWNiZjZjZTNlMTU4NDc0ZTNjZDQ5AAIlc3Vic2NyaWJlciA9IDVkZWFjYmY2Y2UzZTE1ODQ3NGUzY2Q0OQACImV4cGlyZXMgPSAyMDIwLTAxLTA4VDE3OjM1OjE1LjE1MFoAAk9wcmVpbWFnZUhhc2ggPSAxOWIzMzRhOWJkMzRjNzRjNjg5NTEwYWIwNzI5OTgwYmIwMGUxMTk2ZjM4YzE4N2Q3NWMyMWZiN2ZjNmEwNmYyAAAGIAj7DJg3AsbZia5s7sbeSi2EgFRKKoUhNewocnjGozxA';
-
   let authorized = false;
   try {
     for (let i = 0; i < macaroonList.length; i++) {
-      let macaroon = macaroonList[i].split(':')[0];
-      let preimage = macaroonList[i].split(':')[1];
+      const macaroon = macaroonList[i].split(':')[0];
+      const preimage = macaroonList[i].split(':')[1];
       authorized = await lsat.verifyMacaroon(macaroon, preimage, creator._id, content._id);
       if (authorized) break;
     }
@@ -110,39 +105,21 @@ exports.viewPost = async (req, res) => {
     authorized = false;
   }
 
-  // create bottlepay invoice for user to pay
-  /* TODO remove all of bottlepay :(
-  const reqBottlePay = {
-    user: creator
-  };
+  let errorMsg = null;
+  let invoice = '';
+  let macaroon = '';
 
-  let invoice = null;
-
-  // hack to try twice, 1 after refresh token if needed
   try {
-    invoice = await api.getBottlepayInvoice(reqBottlePay, content.price);
+    console.log('Grabbing invoice from creators node: ');
+    invoice = await lnrpc.createInvoice(creator, content.price);
+    console.log(invoice);
+
+
+    // create a macaroon to give to the user
+    macaroon = await lsat.generatePostMacaroon(content._id.toString(), invoice);
   } catch (error) {
-    invoice = await api.getBottlepayInvoice(reqBottlePay, content.price);
+    errorMsg = error.message;
   }
-  */
-
-  console.log('Grabbing invoice from creators node: ');
-  const lnrcpCustom = await createLnrpc({
-    server: creator.lndUrl,
-    cert: creator.tlsCert,
-    macaroon: creator.invoiceMacaroon,
-  });
-
-  const invoice = await lnrcpCustom.addInvoice({ value: content.price });
-  console.log(invoice);
-
-  // create an invoice for the user to pay
-  // const invoice = await lnrpc.addInvoice(content.price);
-  // console.log('invoice: ' + JSON.stringify(invoice));
-  // console.log(invoice);
-
-  // create a macaroon to give to the user
-  const macaroon = await lsat.generatePostMacaroon(content._id.toString(), invoice);
 
   res.render('creator/post/post', {
     title: 'View Post',
@@ -150,7 +127,8 @@ exports.viewPost = async (req, res) => {
     content,
     authorized,
     invoice,
-    macaroon
+    macaroon,
+    errorMsg
   });
 };
 
@@ -160,11 +138,11 @@ exports.viewPost = async (req, res) => {
  * Check the subscription of a user
  */
 exports.postCheck = async (req, res) => {
-  const macaroon = req.body.macaroon;
-  const preimage = req.body.preimage;
+  const { macaroon } = req.body;
+  const { preimage } = req.body;
 
-  console.log('retrieved macaroon: ' + macaroon);
-  console.log('retrieved preimage: ' + preimage);
+  console.log(`retrieved macaroon: ${macaroon}`);
+  console.log(`retrieved preimage: ${preimage}`);
 
   // get the creator
   const getCreator = new Promise((res, rej) => {
@@ -187,50 +165,47 @@ exports.postCheck = async (req, res) => {
   });
 };
 
-
-
 /**
  * GET /creator/:userId/subscribe
  * View the subscription page of a creator
  */
 exports.subscribe = async (req, res) => {
+  let macaroon = '';
+  let creator = '';
+  let invoice = '';
+  let errorMsg = null;
 
-  // get the creator
-  const getCreator = new Promise((res, rej) => {
-    console.log(req);
-    User.findById(req.params.userId, (err, user) => {
-      if (err) console.error(err);
+  try {
+    // get the creator
+    const getCreator = new Promise((res, rej) => {
+      console.log(req);
+      User.findById(req.params.userId, (err, user) => {
+        if (err) console.error(err);
 
-      console.log(`got creator: ${user}`);
-      res(user);
+        console.log(`got creator: ${user}`);
+        res(user);
+      });
     });
-  });
 
-  const creator = await getCreator;
+    creator = await getCreator;
 
-  console.log('Grabbing invoice from creators node: ');
-  const lnrcpCustom = await createLnrpc({
-    server: creator.lndUrl,
-    cert: creator.tlsCert,
-    macaroon: creator.invoiceMacaroon,
-  });
+    console.log('Grabbing invoice from creators node: ');
+    invoice = await lnrpc.createInvoice(creator, creator.profile.supporterAmount);
+    console.log(invoice);
 
-  const invoice = await lnrcpCustom.addInvoice({ value: creator.profile.supporterAmount });
-  console.log(invoice);
-
-  // create an invoice for the user to pay
-  // const invoice = await lnrpc.addInvoice(creator.profile.supporterAmount);
-  // console.log('invoice: ' + JSON.stringify(invoice));
-  // console.log(invoice);
-
-  // create a macaroon to give to the user
-  const macaroon = await lsat.generateMacaroon(creator._id.toString(), invoice);
+    // create a macaroon to give to the user
+    macaroon = await lsat.generateMacaroon(creator._id.toString(), invoice);
+  } catch (error) {
+    console.log('Caught error: ' + error.message);
+    errorMsg = error.message;
+  }
 
   res.render('creator/subscribe', {
     title: 'Subscribe to Creator',
     creator,
     invoice,
-    macaroon
+    macaroon,
+    errorMsg
   });
 };
 
@@ -240,11 +215,11 @@ exports.subscribe = async (req, res) => {
  * Check the subscription of a user
  */
 exports.subscribeCheck = async (req, res) => {
-  const macaroon = req.body.macaroon;
-  const preimage = req.body.preimage;
+  const { macaroon } = req.body;
+  const { preimage } = req.body;
 
-  console.log('retrieved macaroon: ' + macaroon);
-  console.log('retrieved preimage: ' + preimage);
+  console.log(`retrieved macaroon: ${macaroon}`);
+  console.log(`retrieved preimage: ${preimage}`);
 
   // get the creator
   const getCreator = new Promise((res, rej) => {
