@@ -106,6 +106,7 @@ app.use(lusca.xssProtection(true));
 app.disable('x-powered-by');
 app.use((req, res, next) => {
   res.locals.user = req.user;
+  res.locals.testnet = process.env.TESTNET;
   next();
 });
 app.use((req, res, next) => {
