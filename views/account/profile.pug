@@ -11,10 +11,10 @@ block content
       .col-md-7
         input.form-control(type='email', name='email', id='email', value=user.email, autocomplete='email', required)
       .offset-sm-3.col-md-7.pl-3
-        if user.emailVerified
+        // if user.emailVerified
           .text-success.font-italic
             | Verified
-        else
+        // else
           .text-danger.font-italic
             | Unverified: &nbsp;
             a(href='/account/verify') Send verification email
@@ -31,11 +31,11 @@ block content
       .col-md-7
         input.form-control(type='text', name='website', id='website', value=user.profile.website, autocomplete='url')
     .form-group.row
-      label.col-md-3.col-form-label.font-weight-bold.text-right(for='description') description
+      label.col-md-3.col-form-label.font-weight-bold.text-right(for='description') Description
       .col-md-7
         input.form-control(type='text', name='description', id='description', value=user.profile.description)
     .form-group.row
-      label.col-md-3.col-form-label.font-weight-bold.text-right(for='supporterAmount') supporter amount per month
+      label.col-md-3.col-form-label.font-weight-bold.text-right(for='supporterAmount') Supporter amount per month
       .col-md-7
         input.form-control(type='text', name='supporterAmount', id='supporterAmount', value=user.profile.supporterAmount, required)
     .form-group.row
