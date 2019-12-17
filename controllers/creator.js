@@ -45,6 +45,14 @@ exports.viewCreator = async (req, res) => {
  * View a creator's post.
  */
 exports.viewPost = async (req, res) => {
+  let authorized = false;
+
+  // check if user is this creator
+  if (req.user._id.equals(req.params.userId)) {
+    console.log('this is the user, let them see their post..');
+    authorized = true;
+  }
+
   // query variables
   const { macaroons } = req.query;
   let macaroonList = [];
@@ -93,13 +101,13 @@ exports.viewPost = async (req, res) => {
   const content = await getContentById;
 
   // check to see if the user is authorized to see
-  let authorized = false;
   try {
     for (let i = 0; i < macaroonList.length; i++) {
+      if (authorized) break;
+      console.log('Checking macaroon #' + i);
       const macaroon = macaroonList[i].split(':')[0];
       const preimage = macaroonList[i].split(':')[1];
       authorized = await lsat.verifyMacaroon(macaroon, preimage, creator._id, content._id);
-      if (authorized) break;
     }
   } catch (e) {
     authorized = false;
