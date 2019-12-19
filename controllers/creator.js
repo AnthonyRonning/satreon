@@ -1,3 +1,4 @@
+const lightningPayReq = require('bolt11');
 const api = require('./api');
 const User = require('../models/User');
 const Content = require('../models/Content');
@@ -116,12 +117,18 @@ exports.viewPost = async (req, res) => {
   let errorMsg = null;
   let invoice = '';
   let macaroon = '';
+  let nodeInfo = '';
 
   try {
     console.log('Grabbing invoice from creators node: ');
     invoice = await lnrpc.createInvoice(creator, content.price);
     console.log(invoice);
 
+    // decode pay req
+    const decodedPayReq = lightningPayReq.decode(invoice.payment_request);
+    console.log('decoded payreq: ');
+    console.log(decodedPayReq);
+    nodeInfo = `${decodedPayReq.payeeNodeKey}@${creator.lndUrl}`;
 
     // create a macaroon to give to the user
     macaroon = await lsat.generatePostMacaroon(content._id.toString(), invoice);
@@ -136,7 +143,8 @@ exports.viewPost = async (req, res) => {
     authorized,
     invoice,
     macaroon,
-    errorMsg
+    errorMsg,
+    nodeInfo
   });
 };
 
@@ -182,6 +190,7 @@ exports.subscribe = async (req, res) => {
   let creator = '';
   let invoice = '';
   let errorMsg = null;
+  let nodeInfo = '';
 
   try {
     // get the creator
@@ -201,6 +210,12 @@ exports.subscribe = async (req, res) => {
     invoice = await lnrpc.createInvoice(creator, creator.profile.supporterAmount);
     console.log(invoice);
 
+    // decode pay req
+    const decodedPayReq = lightningPayReq.decode(invoice.payment_request);
+    console.log('decoded payreq: ');
+    console.log(decodedPayReq);
+    nodeInfo = `${decodedPayReq.payeeNodeKey}@${creator.lndUrl}`;
+
     // create a macaroon to give to the user
     macaroon = await lsat.generateMacaroon(creator._id.toString(), invoice);
   } catch (error) {
@@ -213,7 +228,8 @@ exports.subscribe = async (req, res) => {
     creator,
     invoice,
     macaroon,
-    errorMsg
+    errorMsg,
+    nodeInfo
   });
 };
 

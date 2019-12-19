@@ -77,6 +77,32 @@ exports.createInvoice = async (creator, amount) => {
 
   const invoice = await lnrcpCustom.addInvoice({ value: amount });
   return invoice;
+};
+
+exports.getInfo = async (creator) => {
+  const lnrcpCustom = await createLnrpc({
+    server: creator.lndUrl,
+    cert: creator.tlsCert,
+    macaroon: creator.invoiceMacaroon,
+  });
+
+  console.log('trying to get creator node info');
+  const info = await lnrcpCustom.getInfo({});
+  console.log(info);
+  return '';
+};
+
+exports.decodePayReq = async (creator, payReq) => {
+  const lnrcpCustom = await createLnrpc({
+    server: creator.lndUrl,
+    cert: creator.tlsCert,
+    macaroon: creator.invoiceMacaroon,
+  });
+
+  console.log('trying to decode pay req');
+  const decodedPayReq = await lnrcpCustom.decodePayReq({ pay_req: payReq });
+  console.log(decodedPayReq);
+  return decodedPayReq;
 }
 
 
