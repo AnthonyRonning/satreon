@@ -155,7 +155,7 @@ app.post('/contact', contactController.postContact);
 app.get('/account/verify', passportConfig.isAuthenticated, userController.getVerifyEmail);
 app.get('/account/verify/:token', passportConfig.isAuthenticated, userController.getVerifyEmailToken);
 app.get('/account', passportConfig.isAuthenticated, userController.getAccount);
-app.post('/account/profile', upload.fields([{ name: 'invoiceMacaroon', maxCount: 1 }, { name: 'tlsCert', maxCount: 1 }]), passportConfig.isAuthenticated, userController.postUpdateProfile);
+app.post('/account/profile', upload.fields([]), passportConfig.isAuthenticated, userController.postUpdateProfile);
 app.post('/account/password', passportConfig.isAuthenticated, userController.postUpdatePassword);
 app.post('/account/delete', passportConfig.isAuthenticated, userController.postDeleteAccount);
 app.get('/account/unlink/:provider', passportConfig.isAuthenticated, userController.getOauthUnlink);

@@ -43,13 +43,9 @@ block content
       .col-md-7
         input.form-control(type='text', name='lndUrl', id='lndUrl', value=user.lndUrl, required)
     .form-group.row
-      label.col-md-3.col-form-label.font-weight-bold.text-right(for='invoiceMacaroon') LND Invoice Macaroon
+      label.col-md-3.col-form-label.font-weight-bold.text-right(for='lndUrl') LND Invoice Macaroon
       .col-md-7
-        input.form-control(type='file', name='invoiceMacaroon', id='invoiceMacaroon', required)
-    .form-group.row
-      label.col-md-3.col-form-label.font-weight-bold.text-right(for='tlsCert') LND TLS Cert
-      .col-md-7
-        input.form-control(type='file', name='tlsCert', id='tlsCert', required)
+        input.form-control(type='text', name='invoiceMacaroon', id='invoiceMacaroon', value=user.invoiceMacaroon, required)
     .form-group.row
       label.col-md-3.col-form-label.font-weight-bold.text-right Gravatar
       .col-sm-4
