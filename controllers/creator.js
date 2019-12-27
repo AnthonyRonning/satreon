@@ -49,7 +49,7 @@ exports.viewPost = async (req, res) => {
   let authorized = false;
 
   // check if user is this creator
-  if (req.user._id.equals(req.params.userId)) {
+  if (req.user && req.user._id && req.user._id.equals(req.params.userId)) {
     console.log('this is the user, let them see their post..');
     authorized = true;
   }
