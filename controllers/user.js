@@ -142,23 +142,29 @@ exports.postUpdateProfile = async (req, res, next) => {
   }
   req.body.email = validator.normalizeEmail(req.body.email, { gmail_remove_dots: false });
 
-  console.log('displaying lnd node info...:');
-  console.log(req.body.lndUrl);
-  console.log(req.body.invoiceMacaroon);
-  console.log(req.files.invoiceMacaroon[0]);
-  console.log(req.files.tlsCert[0]);
+  console.debug('displaying lnd node info...:');
+  console.debug(req.body.lndUrl);
+  console.debug(req.body.invoiceMacaroon);
+  console.debug(req.files.invoiceMacaroon[0]);
+  console.debug(req.files.tlsCert[0]);
+
   const uploadedMacaroonFile = await fs.readFile(req.files.invoiceMacaroon[0].path);
-  console.log(uploadedMacaroonFile.toString('hex'));
+  console.debug('Uploaded Macaroon File Hex:');
+  console.debug(uploadedMacaroonFile.toString('hex'));
+
   const uploadedTlsCert = await fs.readFile(req.files.tlsCert[0].path, 'binary');
-  console.log(uploadedTlsCert);
+  console.debug('Uploaded tls cert:');
+  console.debug(uploadedTlsCert);
 
   // TEST LND
   console.log('Testing LND connection: ');
   const lnrcpCustom = await createLnrpc({
     server: req.body.lndUrl,
-    cert: uploadedTlsCert,
+    tls: false,
     macaroon: uploadedMacaroonFile.toString('hex'),
   });
+
+  console.log('About to test adding invoice..');
 
   const invoiceTest = await lnrcpCustom.addInvoice({ value: 1 });
   console.log(invoiceTest);

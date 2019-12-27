@@ -279,10 +279,10 @@ app.listen(app.get('port'), () => {
 
 /**
  * Start LND
- */
+
 lnd.createLnrpc()
   .then((res) => {
     console.log('started up lnd');
   });
-
+ */
 module.exports = app;
