@@ -166,8 +166,13 @@ exports.postUpdateProfile = async (req, res, next) => {
 
   console.log('About to test adding invoice..');
 
-  const invoiceTest = await lnrcpCustom.addInvoice({ value: 1 });
-  console.log(invoiceTest);
+  try {
+    const invoiceTest = await lnrcpCustom.addInvoice({ value: 1 });
+    console.log(invoiceTest);
+  } catch (e) {
+    req.flash('errors', { msg: 'Error connecting to your node: ' + e.message });
+    return res.redirect('/account');
+  }
 
 
   User.findById(req.user.id, (err, user) => {
