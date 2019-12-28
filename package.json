@@ -92,6 +92,9 @@
     "sinon-mongoose": "^2.3.0",
     "supertest": "^5.0.0-0"
   },
+  "bundledDependencies": [
+    "lnrpc"
+  ],
   "engines": {
     "node": "13.2.0",
     "npm": "6.13.1"
