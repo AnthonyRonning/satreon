@@ -1,16 +1,13 @@
 {
-  "name": "hackathon-starter",
-  "version": "5.2.0",
-  "description": "A boilerplate for Node.js web applications",
+  "name": "satreon",
+  "version": "0.0.1",
+  "description": "Lightning version of Patreon allowing anonymous supporters",
   "repository": {
     "type": "git",
-    "url": "https://github.com/sahat/hackathon-starter.git"
+    "url": "https://github.com/AnthonyRonning/litreon.git"
   },
   "license": "MIT",
-  "author": "Sahat Yalkabov",
-  "contributors": [
-    "Yashar Fakhari (https://github.com/YasharF)"
-  ],
+  "author": "Anthony Ronning",
   "scripts": {
     "postinstall": "npm rebuild node-sass",
     "start": "node app.js",
