@@ -102,16 +102,18 @@ exports.viewPost = async (req, res) => {
   const content = await getContentById;
 
   // check to see if the user is authorized to see
-  try {
-    for (let i = 0; i < macaroonList.length; i++) {
-      if (authorized) break;
-      console.log('Checking macaroon #' + i);
-      const macaroon = macaroonList[i].split(':')[0];
-      const preimage = macaroonList[i].split(':')[1];
-      authorized = await lsat.verifyMacaroon(macaroon, preimage, creator._id, content._id);
+  if (!authorized) {
+    try {
+      for (let i = 0; i < macaroonList.length; i++) {
+        if (authorized) break;
+        console.log('Checking macaroon #' + i);
+        const macaroon = macaroonList[i].split(':')[0];
+        const preimage = macaroonList[i].split(':')[1];
+        authorized = await lsat.verifyMacaroon(macaroon, preimage, creator._id, content._id);
+      }
+    } catch (e) {
+      authorized = false;
     }
-  } catch (e) {
-    authorized = false;
   }
 
   let errorMsg = null;
@@ -119,21 +121,23 @@ exports.viewPost = async (req, res) => {
   let macaroon = '';
   let nodeInfo = '';
 
-  try {
-    console.log('Grabbing invoice from creators node: ');
-    invoice = await lnrpc.createInvoice(creator, content.price);
-    console.log(invoice);
+  if (!authorized) {
+    try {
+      console.log('Grabbing invoice from creators node: ');
+      invoice = await lnrpc.createInvoice(creator, content.price);
+      console.log(invoice);
 
-    // decode pay req
-    const decodedPayReq = lightningPayReq.decode(invoice.payment_request);
-    console.log('decoded payreq: ');
-    console.log(decodedPayReq);
-    nodeInfo = `${decodedPayReq.payeeNodeKey}@${creator.lndUrl}`;
+      // decode pay req
+      const decodedPayReq = lightningPayReq.decode(invoice.payment_request);
+      console.log('decoded payreq: ');
+      console.log(decodedPayReq);
+      nodeInfo = `${decodedPayReq.payeeNodeKey}@${creator.lndUrl}`;
 
-    // create a macaroon to give to the user
-    macaroon = await lsat.generatePostMacaroon(content._id.toString(), invoice);
-  } catch (error) {
-    errorMsg = error.message;
+      // create a macaroon to give to the user
+      macaroon = await lsat.generatePostMacaroon(content._id.toString(), invoice);
+    } catch (error) {
+      errorMsg = error.message;
+    }
   }
 
   res.render('creator/post/post', {

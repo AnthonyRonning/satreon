@@ -1,6 +1,6 @@
 {
   "name": "satreon",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Lightning version of Patreon allowing anonymous supporters",
   "repository": {
     "type": "git",
@@ -9,7 +9,7 @@
   "license": "MIT",
   "author": "Anthony Ronning",
   "scripts": {
-    "postinstall": "npm rebuild node-sass",
+    "postinstall": "npm rebuild node-sass && npm explore lnrpc -- npm run postinstall",
     "start": "node app.js",
     "test": "nyc mocha --timeout=10000 --exit",
     "lint": "eslint \"**/*.js\""
