@@ -13,8 +13,9 @@ block content
         h4.text-center Pay the invoice below or&nbsp
             a(href=`/creator/${creator._id}/subscribe`) click here&nbsp
             | to subscribe to this creator.
+        h4.text-center
+            img.text-center(src=invoiceQR alt="Invoice")
         p.text-center.word-wrap= invoice.payment_request
-
         hr
         p.text-center.word-wrap
             | After paying the invoice, paste your preimage below

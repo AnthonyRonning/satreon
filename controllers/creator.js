@@ -1,4 +1,5 @@
 const lightningPayReq = require('bolt11');
+const QRCode = require('qrcode');
 const api = require('./api');
 const User = require('../models/User');
 const Content = require('../models/Content');
@@ -118,6 +119,7 @@ exports.viewPost = async (req, res) => {
 
   let errorMsg = null;
   let invoice = '';
+  let invoiceQR = '';
   let macaroon = '';
   let nodeInfo = '';
 
@@ -126,6 +128,19 @@ exports.viewPost = async (req, res) => {
       console.log('Grabbing invoice from creators node: ');
       invoice = await lnrpc.createInvoice(creator, content.price);
       console.log(invoice);
+
+      const invoiceQRFunc = async (text) => {
+        try {
+          return await QRCode.toDataURL(text);
+        } catch (err) {
+          console.error(err);
+          return '';
+        }
+      };
+      invoiceQR = await invoiceQRFunc(invoice.payment_request);
+
+      console.debug('invoice qr code');
+      console.debug(invoiceQR);
 
       // decode pay req
       const decodedPayReq = lightningPayReq.decode(invoice.payment_request);
@@ -146,6 +161,7 @@ exports.viewPost = async (req, res) => {
     content,
     authorized,
     invoice,
+    invoiceQR,
     macaroon,
     errorMsg,
     nodeInfo
@@ -193,6 +209,7 @@ exports.subscribe = async (req, res) => {
   let macaroon = '';
   let creator = '';
   let invoice = '';
+  let invoiceQR = '';
   let errorMsg = null;
   let nodeInfo = '';
 
@@ -214,6 +231,20 @@ exports.subscribe = async (req, res) => {
     invoice = await lnrpc.createInvoice(creator, creator.profile.supporterAmount);
     console.log(invoice);
 
+    // invoice qr code generator
+    const invoiceQRFunc = async (text) => {
+      try {
+        return await QRCode.toDataURL(text);
+      } catch (err) {
+        console.error(err);
+        return '';
+      }
+    };
+    invoiceQR = await invoiceQRFunc(invoice.payment_request);
+
+    console.debug('invoice qr code');
+    console.debug(invoiceQR);
+
     // decode pay req
     const decodedPayReq = lightningPayReq.decode(invoice.payment_request);
     console.log('decoded payreq: ');
@@ -231,6 +262,7 @@ exports.subscribe = async (req, res) => {
     title: 'Subscribe to Creator',
     creator,
     invoice,
+    invoiceQR,
     macaroon,
     errorMsg,
     nodeInfo

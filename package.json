@@ -1,6 +1,6 @@
 {
   "name": "satreon",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Lightning version of Patreon allowing anonymous supporters",
   "repository": {
     "type": "git",
@@ -73,6 +73,7 @@
     "paypal-rest-sdk": "^1.8.1",
     "popper.js": "^1.16.0",
     "pug": "^2.0.4",
+    "qrcode": "^1.4.4",
     "request": "^2.88.0",
     "stripe": "^7.14.0",
     "tumblr.js": "^2.0.2",
