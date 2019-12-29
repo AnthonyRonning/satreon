@@ -2,7 +2,7 @@ extends ../../layout
 
 block content
     h1= `${creator.profile.name}'s Post`
-    p.lead= content.title
+    p.lead= `${content.title} [${content.price} SATS]`
     hr
     if errorMsg
         p.text-center.word-wrap Error connecting to creator's lightning node
