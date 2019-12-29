@@ -16,16 +16,19 @@ block content
       var content = '!{content}';
 
     script.
-        var something = function () {
-            // url = `${creator._id}/post/${content._id}?macaroons=123`;
-          url = `123/post/122?macaroons=123`;
-          window.location = url;
-        };
-
-    script.
         function something1(creatorId, contentId){
-            url = `${creatorId}/post/${contentId}?macaroons=${localStorage.getItem("macaroons")}`;
+            macaroons = localStorage.getItem("macaroons");
+            url = `${creatorId}/post/${contentId}?macaroons=${macaroons}`;
             window.location = url;
+
+          /*
+          $.ajax({
+            url: url,
+            headers: { 'Authorization': 'LSAT ' + macaroons }
+          })
+            .done(function () {
+            });
+          */
         }
 
     .row

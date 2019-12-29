@@ -55,14 +55,24 @@ exports.viewPost = async (req, res) => {
     authorized = true;
   }
 
-  // query variables
-  const { macaroons } = req.query;
+  // macaroons from query variables
+  let { macaroons } = req.query;
   let macaroonList = [];
+
+  // macaroons from header take priority
+  const authorizationHeader = req.get('Authorization');
+  if (authorizationHeader) {
+    const lsatCheck = authorizationHeader.split(' ')[0];
+    if (lsatCheck === 'LSAT') {
+      macaroons = authorizationHeader.split(' ')[1];
+    }
+  }
+
 
   let firstMacaroon = '';
   let firstPreimage = '';
 
-  if (macaroons === null) {
+  if (macaroons === null || macaroons === undefined) {
     console.log('macaroons empty');
   } else {
     console.log(`macaroon from the query: ${macaroons}`);
@@ -150,6 +160,10 @@ exports.viewPost = async (req, res) => {
 
       // create a macaroon to give to the user
       macaroon = await lsat.generatePostMacaroon(content._id.toString(), invoice);
+
+      // custom LSAT response
+      res.status(402);
+      res.setHeader('WWW-Authenticate', `LSAT macaroon='${macaroon}' invoice='${invoice.payment_request}'`);
     } catch (error) {
       errorMsg = error.message;
     }
