@@ -49,13 +49,17 @@ block content
       .col-md-7
         input.form-control(type='text', name='supporterAmount', id='supporterAmount', value=user.profile.supporterAmount, required)
     .form-group.row
-      label.col-md-3.col-form-label.font-weight-bold.text-right(for='lndUrl') LND Node URL*
+      label.col-md-3.col-form-label.font-weight-bold.text-right(for='selfNode') Using your own node?
       .col-md-7
-        input.form-control(type='text', name='lndUrl', id='lndUrl', value=user.lndUrl, required)
+        input.form-control(type='checkbox', name='selfNode', id='selfNode', checked=user.selfNode === true)
     .form-group.row
-      label.col-md-3.col-form-label.font-weight-bold.text-right(for='lndUrl') LND Invoice Macaroon*
+      label.col-md-3.col-form-label.font-weight-bold.text-right(for='lndUrl') LND Node URL
       .col-md-7
-        input.form-control(type='text', name='invoiceMacaroon', id='invoiceMacaroon', value=user.invoiceMacaroon, required)
+        input.form-control(type='text', name='lndUrl', id='lndUrl', value=user.lndUrl)
+    .form-group.row
+      label.col-md-3.col-form-label.font-weight-bold.text-right(for='lndUrl') LND Invoice Macaroon
+      .col-md-7
+        input.form-control(type='text', name='invoiceMacaroon', id='invoiceMacaroon', value=user.invoiceMacaroon)
     .form-group.row
       label.col-md-3.col-form-label.font-weight-bold.text-right Gravatar
       .col-sm-4

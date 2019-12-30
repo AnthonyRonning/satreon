@@ -280,10 +280,12 @@ app.listen(app.get('port'), () => {
 
 /**
  * Start LND
-
-lnd.createLnrpc()
-  .then((res) => {
-    console.log('started up lnd');
-  });
  */
+lnd.createServerLnrpc()
+  .then(async (serverLnrpc) => {
+    console.log('started up lnd');
+    const balance = await serverLnrpc.channelBalance({});
+    console.log(balance);
+  });
+
 module.exports = app;
