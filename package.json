@@ -1,6 +1,6 @@
 {
   "name": "satreon",
-  "version": "0.0.6",
+  "version": "0.1.0",
   "description": "Lightning version of Patreon allowing anonymous supporters",
   "repository": {
     "type": "git",

@@ -99,6 +99,7 @@ exports.postSignup = (req, res, next) => {
   const user = new User({
     email: req.body.email,
     password: req.body.password,
+    active: false,
     profile: {
       name: req.body.name
     }
@@ -183,6 +184,7 @@ exports.postUpdateProfile = async (req, res, next) => {
     if (err) { return next(err); }
     if (user.email !== req.body.email) user.emailVerified = false;
     user.email = req.body.email || '';
+    user.active = req.body.active || false;
     user.profile.name = req.body.name || '';
     user.profile.gender = req.body.gender || '';
     user.profile.location = req.body.location || '';

@@ -5,14 +5,13 @@ const User = require('../models/User');
  * Home page.
  */
 exports.index = async (req, res) => {
-  const getAllUsers = new Promise((res, rej) => {
-    User.find((err, users) => {
-      // console.log('got all users: ' + users);
+  const getActiveUsers = new Promise((res, rej) => {
+    User.find({ active: true }, (err, users) => {
       res(users);
     });
   });
 
-  const users = await getAllUsers;
+  const users = await getActiveUsers;
 
   res.render('home', {
     title: 'Home',

@@ -23,6 +23,16 @@ block content
       .col-md-7
         input.form-control(type='text', name='name', id='name', value=user.profile.name, required)
     .form-group.row
+      label.col-md-3.col-form-label.font-weight-bold.text-right Active (list on home page)
+      .col-sm-6
+        .form-check.form-check-inline
+          input(type='radio', class='form-check-input' checked=user.active === true, name='active', value='true', data-toggle='radio')
+          label.form-check-label Yes
+
+        .form-check.form-check-inline
+          input(type='radio', class='form-check-input' checked=user.active === false, name='active', value='false', data-toggle='radio')
+          label.form-check-label No
+    .form-group.row
       label.col-md-3.col-form-label.font-weight-bold.text-right(for='location') Location
       .col-md-7
         input.form-control(type='text', name='location', id='location', value=user.profile.location)
