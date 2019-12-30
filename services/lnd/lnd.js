@@ -32,7 +32,7 @@ exports.getBalance = async (req, res) => {
 };
 
 
-exports.addInvoice = async (value) => {
+exports.createServerInvoice = async (value) => {
   const lnrcpCustom = await this.createServerLnrpc();
 
   return lnrcpCustom.addInvoice({ value });
