@@ -3,6 +3,7 @@ const QRCode = require('qrcode');
 const api = require('./api');
 const User = require('../models/User');
 const Content = require('../models/Content');
+const PendingInvoices = require('../models/PendingInvoices');
 const lnrpc = require('../services/lnd/lnd');
 const lsat = require('../services/lsat/lsat');
 
@@ -41,6 +42,23 @@ exports.viewCreator = async (req, res) => {
   });
 };
 
+
+async function saveCreatorInvoice(creator, price, invoice, type = '', referenceId = '') {
+  const pendingInvoice = new PendingInvoices();
+  pendingInvoice.creatorId = creator._id;
+  pendingInvoice.amount = price;
+  pendingInvoice.status = 'pending';
+  pendingInvoice.invoice = invoice.payment_request;
+  pendingInvoice.type = type;
+  pendingInvoice.refId = referenceId;
+  await pendingInvoice.save(async (err) => {
+    if (err) {
+      console.error('error saving invoice information for this creator payment.. abort');
+      console.error(err.message);
+      throw err;
+    }
+  });
+}
 
 /**
  * GET /creator/:userId/post/:postId
@@ -138,6 +156,9 @@ exports.viewPost = async (req, res) => {
         console.log('Using satreons node for this creator.');
         invoice = await lnrpc.createServerInvoice(content.price);
         nodeInfo = `${process.env.SATREON_LND_PUBKEY}`;
+
+        // add invoice to pending invoices for creator to keep track of balance
+        await saveCreatorInvoice(creator, content.price, invoice, 'content', content._id);
       }
 
 
@@ -241,6 +262,9 @@ exports.subscribe = async (req, res) => {
       console.log('Using satreons node for this creator.');
       invoice = await lnrpc.createServerInvoice(creator.profile.supporterAmount);
       nodeInfo = `${process.env.SATREON_LND_PUBKEY}`;
+
+      // add invoice to pending invoices for creator to keep track of balance
+      await saveCreatorInvoice(creator, creator.profile.supporterAmount, invoice, 'subscription');
     }
     console.log(invoice);
 
