@@ -4,7 +4,7 @@
   "description": "Lightning version of Patreon allowing anonymous supporters",
   "repository": {
     "type": "git",
-    "url": "https://github.com/AnthonyRonning/litreon.git"
+    "url": "https://github.com/AnthonyRonning/satreon.git"
   },
   "license": "MIT",
   "author": "Anthony Ronning",
