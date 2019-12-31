@@ -154,6 +154,7 @@ app.post('/creator/:userId/post/postCheck', creatorController.postCheck);
 app.get('/creator/:userId/subscribe', creatorController.subscribe);
 app.post('/creator/:userId/subscribeCheck', creatorController.subscribeCheck);
 app.get('/wallet/balance', walletController.viewBalance);
+app.post('/wallet/withdraw', walletController.postWithdrawal);
 app.post('/contact', contactController.postContact);
 app.get('/account/verify', passportConfig.isAuthenticated, userController.getVerifyEmail);
 app.get('/account/verify/:token', passportConfig.isAuthenticated, userController.getVerifyEmailToken);

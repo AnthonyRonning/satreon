@@ -43,6 +43,21 @@ exports.serverLookupInvoice = async (r_hash_str) => {
   return lnrcpCustom.lookupInvoice({ r_hash_str });
 };
 
+exports.serverSendPayment = async (payment_request) => {
+  console.log('[lnrpc] attempting to send payment');
+  console.log(payment_request);
+  const lnrcpCustom = await this.createServerLnrpc();
+
+  const response = await lnrcpCustom.sendPaymentSync({ payment_request });
+  console.log(response);
+
+  if (response.payment_preimage) {
+    return response.payment_preimage;
+  } else {
+    throw response.payment_error;
+  }
+};
+
 exports.createInvoice = async (creator, amount) => {
   const lnrcpCustom = await createLnrpc({
     server: creator.lndUrl,
