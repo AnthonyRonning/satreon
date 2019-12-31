@@ -36,6 +36,7 @@ const apiController = require('./controllers/api');
 const contactController = require('./controllers/contact');
 const contentController = require('./controllers/content');
 const creatorController = require('./controllers/creator');
+const walletController = require('./controllers/wallet');
 
 /**
  * API keys and Passport configuration.
@@ -152,6 +153,7 @@ app.get('/creator/:userId/post/:postId', creatorController.viewPost);
 app.post('/creator/:userId/post/postCheck', creatorController.postCheck);
 app.get('/creator/:userId/subscribe', creatorController.subscribe);
 app.post('/creator/:userId/subscribeCheck', creatorController.subscribeCheck);
+app.get('/wallet/balance', walletController.viewBalance);
 app.post('/contact', contactController.postContact);
 app.get('/account/verify', passportConfig.isAuthenticated, userController.getVerifyEmail);
 app.get('/account/verify/:token', passportConfig.isAuthenticated, userController.getVerifyEmailToken);

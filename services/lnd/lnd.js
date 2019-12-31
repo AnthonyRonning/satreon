@@ -31,11 +31,16 @@ exports.getBalance = async (req, res) => {
   return lnrcpCustom.walletBalance({});
 };
 
-
 exports.createServerInvoice = async (value) => {
   const lnrcpCustom = await this.createServerLnrpc();
 
   return lnrcpCustom.addInvoice({ value });
+};
+
+exports.serverLookupInvoice = async (r_hash_str) => {
+  const lnrcpCustom = await this.createServerLnrpc();
+
+  return lnrcpCustom.lookupInvoice({ r_hash_str });
 };
 
 exports.createInvoice = async (creator, amount) => {
