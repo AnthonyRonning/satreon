@@ -140,43 +140,49 @@ exports.getAccount = (req, res) => {
 exports.postUpdateProfile = async (req, res, next) => {
   const validationErrors = [];
   if (!validator.isEmail(req.body.email)) validationErrors.push({ msg: 'Please enter a valid email address.' });
-
+  if (req.body.selfNode === 'on' && (validator.isEmpty(req.body.lndUrl) || validator.isEmpty(req.body.invoiceMacaroon))) {
+    validationErrors.push({ msg: 'If you choose to use your own node, please enter LND info.' });
+  }
   if (validationErrors.length) {
     req.flash('errors', validationErrors);
     return res.redirect('/account');
   }
   req.body.email = validator.normalizeEmail(req.body.email, { gmail_remove_dots: false });
 
-  console.debug('displaying lnd node info...:');
-  console.debug(req.body.lndUrl);
-  console.debug(req.body.invoiceMacaroon);
-  // console.debug(req.files.invoiceMacaroon[0]);
-  // console.debug(req.files.tlsCert[0]);
-
-  // const uploadedMacaroonFile = await fs.readFile(req.files.invoiceMacaroon[0].path);
-  // console.debug('Uploaded Macaroon File Hex:');
-  // console.debug(uploadedMacaroonFile.toString('hex'));
-
-  // const uploadedTlsCert = await fs.readFile(req.files.tlsCert[0].path, 'binary');
-  // console.debug('Uploaded tls cert:');
-  // console.debug(uploadedTlsCert);
-
   // TEST LND
-  console.log('Testing LND connection: ');
-  const lnrcpCustom = await createLnrpc({
-    server: req.body.lndUrl,
-    tls: false,
-    macaroon: req.body.invoiceMacaroon,
-  });
+  console.log(`User wants to use their own node: ${req.body.selfNode === 'on'}`);
+  if (req.body.selfNode === 'on'){
 
-  console.log('About to test adding invoice..');
+    console.debug('displaying lnd node info...:');
+    console.debug(req.body.lndUrl);
+    console.debug(req.body.invoiceMacaroon);
+    // console.debug(req.files.invoiceMacaroon[0]);
+    // console.debug(req.files.tlsCert[0]);
 
-  try {
-    const invoiceTest = await lnrcpCustom.addInvoice({ value: 1 });
-    console.log(invoiceTest);
-  } catch (e) {
-    req.flash('errors', { msg: 'Error connecting to your node: ' + e.message });
-    return res.redirect('/account');
+    // const uploadedMacaroonFile = await fs.readFile(req.files.invoiceMacaroon[0].path);
+    // console.debug('Uploaded Macaroon File Hex:');
+    // console.debug(uploadedMacaroonFile.toString('hex'));
+
+    // const uploadedTlsCert = await fs.readFile(req.files.tlsCert[0].path, 'binary');
+    // console.debug('Uploaded tls cert:');
+    // console.debug(uploadedTlsCert);
+
+    console.log('Testing LND connection: ');
+    const lnrcpCustom = await createLnrpc({
+      server: req.body.lndUrl,
+      tls: false,
+      macaroon: req.body.invoiceMacaroon,
+    });
+
+    console.log('About to test adding invoice..');
+
+    try {
+      const invoiceTest = await lnrcpCustom.addInvoice({ value: 1 });
+      console.log(invoiceTest);
+    } catch (e) {
+      req.flash('errors', { msg: 'Error connecting to your node: ' + e.message });
+      return res.redirect('/account');
+    }
   }
 
 
@@ -191,6 +197,7 @@ exports.postUpdateProfile = async (req, res, next) => {
     user.profile.website = req.body.website || '';
     user.profile.description = req.body.description || '';
     user.profile.supporterAmount = req.body.supporterAmount || '';
+    user.selfNode = req.body.selfNode === 'on' || false;
     user.lndUrl = req.body.lndUrl || '';
     user.invoiceMacaroon = req.body.invoiceMacaroon || '';
     // user.tlsCert = uploadedTlsCert || '';

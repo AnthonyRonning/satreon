@@ -35,7 +35,8 @@ const userSchema = new mongoose.Schema({
 
   lndUrl: String,
   tlsCert: String,
-  invoiceMacaroon: String
+  invoiceMacaroon: String,
+  selfNode: Boolean
 }, { timestamps: true });
 
 /**

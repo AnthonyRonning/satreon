@@ -1,34 +1,12 @@
 const createLnrpc = require('lnrpc');
 
-exports.createCustomLnRpc = async () => createLnrpc({
-  /*
-     By default lnrpc connects to `localhost:10001`,
-     however we can point to any host.
-     */
-  server: 'localhost:10009',
-
-  /*
-     By default  lnrpc looks for your tls certificate at:
-     `~/.lnd/tls.cert`, unless it detects you're using macOS and
-     defaults to `~/Library/Application\ Support/Lnd/tls.cert`
-     however you can configure your own SSL certificate path like:
-     */
-  tls: '/Volumes/Samsung750/Bitcoin/Testnet/lnd/tls.cert',
-
-  /*
-     Optional path to configure macaroon authentication
-     from LND generated macaroon file.
-     */
-  macaroonPath: '/Volumes/Samsung750/Bitcoin/Testnet/lnd/data/chain/bitcoin/testnet/admin.macaroon',
-});
-
-exports.createLnrpc = async (req, res) => {
-  const lnrcpCustom = await createLnrpc({
+exports.createServerLnrpc = async (req, res) => {
+  return await createLnrpc({
     /*
      By default lnrpc connects to `localhost:10001`,
      however we can point to any host.
      */
-    server: 'localhost:10009',
+    server: process.env.SATREON_LND_URL,
 
     /*
      By default  lnrpc looks for your tls certificate at:
@@ -36,36 +14,48 @@ exports.createLnrpc = async (req, res) => {
      defaults to `~/Library/Application\ Support/Lnd/tls.cert`
      however you can configure your own SSL certificate path like:
      */
-    tls: '/Volumes/Samsung750/Bitcoin/Testnet/lnd/tls.cert',
+    tls: false,
 
     /*
      Optional path to configure macaroon authentication
      from LND generated macaroon file.
      */
-    macaroonPath: '/Volumes/Samsung750/Bitcoin/Testnet/lnd/data/chain/bitcoin/testnet/admin.macaroon',
+    macaroon: process.env.SATREON_LND_ADMIN_MACAROON,
   });
-
-  // All requests are promisified
-  const balance = await lnrcpCustom.walletBalance({});
-
-  // ...and you're off!
-  console.log(balance);
-
-  return lnrcpCustom;
 };
 
 
 exports.getBalance = async (req, res) => {
-  const lnrcpCustom = await this.createCustomLnRpc();
+  const lnrcpCustom = await this.createServerLnrpc();
 
   return lnrcpCustom.walletBalance({});
 };
 
-
-exports.addInvoice = async (value) => {
-  const lnrcpCustom = await this.createCustomLnRpc();
+exports.createServerInvoice = async (value) => {
+  const lnrcpCustom = await this.createServerLnrpc();
 
   return lnrcpCustom.addInvoice({ value });
+};
+
+exports.serverLookupInvoice = async (r_hash_str) => {
+  const lnrcpCustom = await this.createServerLnrpc();
+
+  return lnrcpCustom.lookupInvoice({ r_hash_str });
+};
+
+exports.serverSendPayment = async (payment_request) => {
+  console.log('[lnrpc] attempting to send payment');
+  console.log(payment_request);
+  const lnrcpCustom = await this.createServerLnrpc();
+
+  const response = await lnrcpCustom.sendPaymentSync({ payment_request });
+  console.log(response);
+
+  if (response.payment_preimage) {
+    return response.payment_preimage;
+  } else {
+    throw response.payment_error;
+  }
 };
 
 exports.createInvoice = async (creator, amount) => {

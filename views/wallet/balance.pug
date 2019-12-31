@@ -1,0 +1,21 @@
+extends ../layout
+
+block content
+    h1= `Wallet Balance`
+    p.lead= `${balance} SATS`
+    hr
+    if balance
+        h4.text-center.word-wrap Yay you have a balance! Submit an invoice to withdrawal below:
+        form(action='/wallet/withdraw', method='POST')
+            input(type='hidden', name='_csrf', value=_csrf)
+            .form-group.row
+                label.col-md-3.col-form-label.font-weight-bold.text-right(for='invoice') Invoice
+                .col-md-7
+                    input.form-control(type='text', name='invoice', id='invoice', placeholder='ln1132..', autofocus, required)
+            .form-group.offset-sm-3.col-md-7.pl-2
+                button.btn.btn-success(type='submit')
+                    i.fas.fa-user-plus.fa-sm
+                    | Submit
+    else
+        h4.text-center.word-wrap No balance, get to posting!!
+

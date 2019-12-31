@@ -3,6 +3,7 @@ const QRCode = require('qrcode');
 const api = require('./api');
 const User = require('../models/User');
 const Content = require('../models/Content');
+const PendingInvoices = require('../models/PendingInvoices');
 const lnrpc = require('../services/lnd/lnd');
 const lsat = require('../services/lsat/lsat');
 
@@ -42,12 +43,34 @@ exports.viewCreator = async (req, res) => {
 };
 
 
+async function saveCreatorInvoice(creator, price, invoice, type = '', referenceId = '') {
+  const pendingInvoice = new PendingInvoices();
+  pendingInvoice.creatorId = creator._id;
+  pendingInvoice.amount = price;
+  pendingInvoice.status = 'pending';
+  pendingInvoice.invoice = invoice.payment_request;
+  pendingInvoice.type = type;
+  pendingInvoice.refId = referenceId;
+  await pendingInvoice.save(async (err) => {
+    if (err) {
+      console.error('error saving invoice information for this creator payment.. abort');
+      console.error(err.message);
+      throw err;
+    }
+  });
+}
+
 /**
  * GET /creator/:userId/post/:postId
  * View a creator's post.
  */
 exports.viewPost = async (req, res) => {
   let authorized = false;
+  let errorMsg = null;
+  let invoice = '';
+  let invoiceQR = '';
+  let macaroon = '';
+  let nodeInfo = '';
 
   // check if user is this creator
   if (req.user && req.user._id && req.user._id.equals(req.params.userId)) {
@@ -68,24 +91,13 @@ exports.viewPost = async (req, res) => {
     }
   }
 
-
-  let firstMacaroon = '';
-  let firstPreimage = '';
-
   if (macaroons === null || macaroons === undefined) {
     console.log('macaroons empty');
   } else {
     console.log(`macaroon from the query: ${macaroons}`);
 
     macaroonList = macaroons.split(',');
-
-    // first macaroon : preimage pair
-    firstMacaroon = macaroonList[0].split(':')[0];
-    firstPreimage = macaroonList[0].split(':')[1];
   }
-
-  console.log(`first macaroon:${firstMacaroon}`);
-  console.log(`first preimage: ${firstPreimage}`);
 
   // get the creator
   const getCreator = new Promise((res, rej) => {
@@ -117,7 +129,7 @@ exports.viewPost = async (req, res) => {
     try {
       for (let i = 0; i < macaroonList.length; i++) {
         if (authorized) break;
-        console.log('Checking macaroon #' + i);
+        console.log(`Checking macaroon #${i}`);
         const macaroon = macaroonList[i].split(':')[0];
         const preimage = macaroonList[i].split(':')[1];
         authorized = await lsat.verifyMacaroon(macaroon, preimage, creator._id, content._id);
@@ -127,36 +139,30 @@ exports.viewPost = async (req, res) => {
     }
   }
 
-  let errorMsg = null;
-  let invoice = '';
-  let invoiceQR = '';
-  let macaroon = '';
-  let nodeInfo = '';
-
   if (!authorized) {
     try {
-      console.log('Grabbing invoice from creators node: ');
-      invoice = await lnrpc.createInvoice(creator, content.price);
-      console.log(invoice);
+      if (creator.selfNode === true || creator.selfNode === undefined) {
+        console.log('Grabbing invoice from creators node: ');
+        invoice = await lnrpc.createInvoice(creator, content.price);
+        console.log(invoice);
 
-      const invoiceQRFunc = async (text) => {
-        try {
-          return await QRCode.toDataURL(text);
-        } catch (err) {
-          console.error(err);
-          return '';
-        }
-      };
-      invoiceQR = await invoiceQRFunc(invoice.payment_request);
+        // decode pay req
+        const decodedPayReq = lightningPayReq.decode(invoice.payment_request);
+        console.log('decoded payreq: ');
+        console.log(decodedPayReq);
+        nodeInfo = `${decodedPayReq.payeeNodeKey}@${creator.lndUrl}`;
+      } else {
+        // using satreon's node
+        console.log('Using satreons node for this creator.');
+        invoice = await lnrpc.createServerInvoice(content.price);
+        nodeInfo = `${process.env.SATREON_LND_PUBKEY}`;
 
-      console.debug('invoice qr code');
-      console.debug(invoiceQR);
+        // add invoice to pending invoices for creator to keep track of balance
+        await saveCreatorInvoice(creator, content.price, invoice, 'content', content._id);
+      }
 
-      // decode pay req
-      const decodedPayReq = lightningPayReq.decode(invoice.payment_request);
-      console.log('decoded payreq: ');
-      console.log(decodedPayReq);
-      nodeInfo = `${decodedPayReq.payeeNodeKey}@${creator.lndUrl}`;
+
+      invoiceQR = await this.invoiceQRMethod(invoice.payment_request);
 
       // create a macaroon to give to the user
       macaroon = await lsat.generatePostMacaroon(content._id.toString(), invoice);
@@ -241,34 +247,34 @@ exports.subscribe = async (req, res) => {
 
     creator = await getCreator;
 
-    console.log('Grabbing invoice from creators node: ');
-    invoice = await lnrpc.createInvoice(creator, creator.profile.supporterAmount);
+    // check for creator's personal node or custodian
+    if (creator.selfNode === true || creator.selfNode === undefined) {
+      console.log('Grabbing invoice from creators node: ');
+      invoice = await lnrpc.createInvoice(creator, creator.profile.supporterAmount);
+
+      // decode pay req
+      const decodedPayReq = lightningPayReq.decode(invoice.payment_request);
+      console.log('decoded payreq: ');
+      console.log(decodedPayReq);
+      nodeInfo = `${decodedPayReq.payeeNodeKey}@${creator.lndUrl}`;
+    } else {
+      // using satreon's node
+      console.log('Using satreons node for this creator.');
+      invoice = await lnrpc.createServerInvoice(creator.profile.supporterAmount);
+      nodeInfo = `${process.env.SATREON_LND_PUBKEY}`;
+
+      // add invoice to pending invoices for creator to keep track of balance
+      await saveCreatorInvoice(creator, creator.profile.supporterAmount, invoice, 'subscription');
+    }
     console.log(invoice);
 
     // invoice qr code generator
-    const invoiceQRFunc = async (text) => {
-      try {
-        return await QRCode.toDataURL(text);
-      } catch (err) {
-        console.error(err);
-        return '';
-      }
-    };
-    invoiceQR = await invoiceQRFunc(invoice.payment_request);
-
-    console.debug('invoice qr code');
-    console.debug(invoiceQR);
-
-    // decode pay req
-    const decodedPayReq = lightningPayReq.decode(invoice.payment_request);
-    console.log('decoded payreq: ');
-    console.log(decodedPayReq);
-    nodeInfo = `${decodedPayReq.payeeNodeKey}@${creator.lndUrl}`;
+    invoiceQR = await this.invoiceQRMethod(invoice.payment_request);
 
     // create a macaroon to give to the user
     macaroon = await lsat.generateMacaroon(creator._id.toString(), invoice);
   } catch (error) {
-    console.log('Caught error: ' + error.message);
+    console.log(`Caught error: ${error.message}`);
     errorMsg = error.message;
   }
 
@@ -314,4 +320,14 @@ exports.subscribeCheck = async (req, res) => {
     macaroon,
     preimage
   });
+};
+
+
+exports.invoiceQRMethod = async (text) => {
+  try {
+    return await QRCode.toDataURL(text);
+  } catch (err) {
+    console.error(err);
+    return '';
+  }
 };

@@ -34,6 +34,10 @@
             ul.dropdown-menu
               li.dropdown-item
                 a(href='/account') My Account
+              if !user.selfNode
+                li.divider.dropdown-item
+                li.dropdown-item
+                  a(href='/wallet/balance') Wallet
               li.divider.dropdown-item
               li.dropdown-item
                 a(href='/logout') Logout

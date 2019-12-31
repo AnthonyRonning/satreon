@@ -1,0 +1,9 @@
+extends ../layout
+
+block content
+    h1= `Withdrawal Confirmation!`
+    hr
+    if success
+        h4.text-center.word-wrap Successfully withdrew some funds!
+    else
+        h4.text-center.word-wrap Withdraw failure, please try again later or contact owner
