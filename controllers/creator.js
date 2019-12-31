@@ -141,7 +141,7 @@ exports.viewPost = async (req, res) => {
 
   if (!authorized) {
     try {
-      if (creator.selfNode === true || creator.selfNode === undefined) {
+      if (creator.selfNode === true) {
         console.log('Grabbing invoice from creators node: ');
         invoice = await lnrpc.createInvoice(creator, content.price);
         console.log(invoice);
