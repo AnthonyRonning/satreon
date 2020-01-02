@@ -11,6 +11,69 @@ exports.createContent = async (req, res) => {
   });
 };
 
+/**
+ * GET /content/create
+ * Content Create page.
+ */
+exports.editContent = async (req, res) => {
+  const postId = req.params.postId;
+  console.log(`user editing post ${postId}`);
+
+  // get the post
+  const getContentById = new Promise((res, rej) => {
+    Content.findById(postId, (err, content) => {
+      if (err) console.error(err);
+
+      console.log(`got content: ${content}`);
+      res(content);
+    });
+  });
+
+  const content = await getContentById;
+
+  res.render('content/edit', {
+    title: 'Edit Content',
+    content
+  });
+};
+
+
+/**
+ * POST /content/:postId/edit
+ * Edit a post.
+ */
+exports.postEditContent = (req, res, next) => {
+  const { postId } = req.params;
+
+  User.findById(req.user.id, async (err, user) => {
+    if (err) { return next(err); }
+    // get the post
+    const getContentById = new Promise((res, rej) => {
+      Content.findById(postId, (err, content) => {
+        if (err) console.error(err);
+
+        console.log(`got content: ${content}`);
+        res(content);
+      });
+    });
+
+    const content = await getContentById;
+
+    content.title = req.body.title || '';
+    content.content = req.body.content || '';
+    content.price = req.body.price || 0;
+
+    content.save((err) => {
+      if (err) {
+        console.error(err);
+        return next(err);
+      }
+      req.flash('success', { msg: 'Content edited!' });
+      res.redirect(`/creator/${user._id}/post/${content._id}`);
+    });
+  });
+};
+
 
 /**
  * POST /content/create
@@ -26,13 +89,13 @@ exports.postContent = (req, res, next) => {
     newContent.userId = req.user.id || '';
     newContent.userName = user.profile.name || '';
 
-    newContent.save((err) => {
+    newContent.save((err, content) => {
       if (err) {
         console.error(err);
         return next(err);
       }
       req.flash('success', { msg: 'Content posted!' });
-      res.redirect('/');
+      res.redirect(`/creator/${user._id}/post/${content._id}`);
     });
   });
 };

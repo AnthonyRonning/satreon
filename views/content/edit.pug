@@ -1,0 +1,24 @@
+extends ../layout
+
+block content
+    .pb-2.mt-2.mb-4.border-bottom
+        h3 Edit Post
+
+    form(action=`/content/${content._id}/edit`, method='POST')
+        input(type='hidden', name='_csrf', value=_csrf)
+        .form-group.row
+            label(class='col-md-2 col-form-label font-weight-bold', for='title') Title
+            .col-md-8
+                textarea.form-control(name='title', id='title', rows='1', required)= content.title
+        .form-group.row
+            label(class='col-md-2 col-form-label font-weight-bold', for='content') Content
+            .col-md-8
+                textarea.form-control(name='content', id='content', rows='7', required)= content.content
+        .form-group.row
+            label(class='col-md-2 col-form-label font-weight-bold', for='price') Price (sats)
+            .col-md-8
+                input.form-control(type='number', name='price', id='price', required, value=content.price)
+        .form-group
+            .offset-md-2.col-md-8.p-1
+                button.btn.btn-primary(type='submit')
+                    |Post

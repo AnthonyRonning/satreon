@@ -65,6 +65,7 @@ async function saveCreatorInvoice(creator, price, invoice, type = '', referenceI
  * View a creator's post.
  */
 exports.viewPost = async (req, res) => {
+  let owner = false;
   let authorized = false;
   let errorMsg = null;
   let invoice = '';
@@ -76,6 +77,7 @@ exports.viewPost = async (req, res) => {
   if (req.user && req.user._id && req.user._id.equals(req.params.userId)) {
     console.log('this is the user, let them see their post..');
     authorized = true;
+    owner = true;
   }
 
   // macaroons from query variables
@@ -180,6 +182,7 @@ exports.viewPost = async (req, res) => {
     creator,
     content,
     authorized,
+    owner,
     invoice,
     invoiceQR,
     macaroon,

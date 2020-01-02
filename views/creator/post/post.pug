@@ -3,6 +3,8 @@ extends ../../layout
 block content
     h1= `${creator.profile.name}'s Post`
     p.lead= `${content.title} [${content.price} SATS]`
+    if owner
+        a.btn.btn-raised(href=`/content/${content._id}/edit`, role='button') Edit Post »
     hr
     if errorMsg
         p.text-center.word-wrap Error connecting to creator's lightning node
