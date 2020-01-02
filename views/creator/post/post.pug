@@ -9,7 +9,7 @@ block content
     if errorMsg
         p.text-center.word-wrap Error connecting to creator's lightning node
     else if authorized
-        h3.text-center.word-wrap= content.content
+        h3.text-center.word-wrap.white-space-pre!= content.content
     else
         h4.text-center You have not paid or subscribed to this user to view this post! 😡
         h4.text-center Pay the invoice below or&nbsp
