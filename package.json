@@ -1,6 +1,6 @@
 {
   "name": "satreon",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Lightning version of Patreon allowing anonymous supporters",
   "repository": {
     "type": "git",
@@ -9,7 +9,7 @@
   "license": "MIT",
   "author": "Anthony Ronning",
   "scripts": {
-    "postinstall": "npm rebuild node-sass && npm explore lnrpc -- npm run postinstall",
+    "postinstall": "npm rebuild node-sass",
     "start": "node app.js",
     "test": "nyc mocha --timeout=10000 --exit",
     "lint": "eslint \"**/*.js\""
@@ -44,7 +44,7 @@
     "jquery": "^3.4.1",
     "lastfm": "^0.9.3",
     "lnd-grpc": "^0.3.3",
-    "lnrpc": "^0.6.1",
+    "lnrpc": "github:Matt-Jensen/lnrpc#hotfix/23-cache-rpc-proto",
     "lob": "^6.0.6",
     "lodash": "^4.17.15",
     "lusca": "^1.6.1",
