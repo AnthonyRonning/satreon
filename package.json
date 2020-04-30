@@ -41,7 +41,7 @@
     "fbgraph": "^1.4.4",
     "googleapis": "^45.0.0",
     "instagram-node": "^0.5.8",
-    "jquery": "^3.4.1",
+    "jquery": "^3.5.0",
     "lastfm": "^0.9.3",
     "lnd-grpc": "^0.3.3",
     "lnrpc": "github:Matt-Jensen/lnrpc#hotfix/23-cache-rpc-proto",
