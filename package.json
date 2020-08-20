@@ -20,7 +20,7 @@
     "@octokit/rest": "^16.35.0",
     "acorn": "^7.1.0",
     "axios": "^0.19.0",
-    "bcrypt": "^3.0.7",
+    "bcrypt": "^5.0.0",
     "body-parser": "^1.19.0",
     "bolt11": "^1.2.6",
     "bootstrap": "^4.4.1",
