@@ -46,7 +46,7 @@
     "lnd-grpc": "^0.3.3",
     "lnrpc": "github:Matt-Jensen/lnrpc#hotfix/23-cache-rpc-proto",
     "lob": "^6.0.6",
-    "lodash": "^4.17.15",
+    "lodash": "^4.17.21",
     "lusca": "^1.6.1",
     "macaroon": "github:go-macaroon/js-macaroon#master",
     "mailchecker": "^3.3.2",
