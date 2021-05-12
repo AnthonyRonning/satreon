@@ -25,7 +25,7 @@
     "bolt11": "^1.2.6",
     "bootstrap": "^4.4.1",
     "chalk": "^3.0.0",
-    "chart.js": "^2.9.3",
+    "chart.js": "^2.9.4",
     "cheerio": "^1.0.0-rc.3",
     "clockwork": "^0.1.4",
     "compression": "^1.7.4",
